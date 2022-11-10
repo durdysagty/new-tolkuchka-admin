@@ -1,0 +1,1 @@
+export const r = { success: 0, fail: 1, already: 2 }
