@@ -3,7 +3,7 @@ import config from './configs/config.json'
 import { DataContext } from './configs/dataContext'
 import { BrowserRouter, Link as RouterLink, Route, Routes } from 'react-router-dom'
 import { AppBar, Box, Button, createTheme, CssBaseline, FormHelperText, styled, TextField, ThemeProvider, Drawer, Toolbar, IconButton, List, ListItemButton, Divider, ListItemIcon, ListItemText, Link } from '@mui/material'
-import { AltRoute, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, CurrencyExchange, DesignServices, EventSeat, Home, Label, Menu, QrCode } from '@mui/icons-material'
+import { AltRoute, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPasteGo, CurrencyExchange, DesignServices, EventSeat, Home, Label, Menu, QrCode } from '@mui/icons-material'
 import Employee from './links/Employee'
 import Progress from './shared/Progress'
 import Position from './links/Position'
@@ -20,6 +20,7 @@ import Product from './links/Product'
 import Slide from './links/Slide'
 import Currency from './links/Currency'
 import SpecsValueMod from './links/SpecsValueMod'
+import Content from './links/Content'
 
 const drawerWidth = 180
 
@@ -216,6 +217,7 @@ function App() {
 
   const apis = {
     br: 'brand',
+    co: 'content',
     ct: 'category',
     cr: 'currency',
     em: 'employee',
@@ -361,7 +363,8 @@ function App() {
     employees: [<Badge />, <Models models={config.text.employees} api={apis.em} />],
     'employee/:pro/:id': [null, <Employee api={apis.em} dataFrom={apis.po} />],
     positions: [<EventSeat />, <Models models={config.text.positions} api={apis.po} pro={true} />],
-    'position/:pro/:id': [null, <Position api={apis.po} />]
+    'position/:pro/:id': [null, <Position api={apis.po} />],
+    content: [<ContentPasteGo />, <Content api={apis.co} />]
   }
 
   return (

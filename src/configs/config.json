@@ -9,6 +9,14 @@
         "justifyContent": "center"
     },
     "text": {
+        "aboutRu": "О нас",
+        "deliveryRu": "Доставка",
+        "aboutEn": "About",
+        "deliveryEn": "Delivery",
+        "aboutTk": "Biz hakynda",
+        "deliveryTk": "Eltip bermek",
+        "content": "Контент",
+        "content2": "контент",
         "log": "Логин",
         "password": "Пароль",
         "loginError": "Не верный лоин или пароль",

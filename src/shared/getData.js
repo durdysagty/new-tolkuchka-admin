@@ -26,7 +26,7 @@ export async function getData(api) {
     }
 }
 
-export async function getEditModel(api, id) {
+export async function getEditModel(api, id = '') {
     try {
         const response = await fetch(`${config.apibase}${config.api}${api}/${id}`, {
             method: 'GET',
