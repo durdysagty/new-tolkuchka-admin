@@ -14,6 +14,8 @@ export default function AccordionList(props) {
     const [list, setList] = useState(props.list)
 
     useEffect(() => {
+        if (list === null)
+            setSelected('')
         function selectList(list) {
             console.log(`selectList`)
             return list.map((l, i) => {
@@ -71,6 +73,7 @@ export default function AccordionList(props) {
         else {
             setToSelect(false)
         }
+        return setId(null)
     }, [toSelect, props, props.id, id, selected, list])
 
     return <Accordion>

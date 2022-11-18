@@ -8,7 +8,7 @@ export default function TableHeader(props) {
             <TableRow>
                 {props.data.map((c, i) => (
                     <TableCell key={i} component='th'>
-                        <strong>{config.text[c]}</strong>
+                        <strong>{c === 'name' && props.human ? config.text.humanName : config.text[c]}</strong>
                     </TableCell>
                 ))}
                 <TableCell component='th'>

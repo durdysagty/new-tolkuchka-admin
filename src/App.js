@@ -1,9 +1,10 @@
+//#region imports
 import { useEffect, useState } from 'react'
 import config from './configs/config.json'
 import { DataContext } from './configs/dataContext'
 import { BrowserRouter, Link as RouterLink, Route, Routes } from 'react-router-dom'
 import { AppBar, Box, Button, createTheme, CssBaseline, FormHelperText, styled, TextField, ThemeProvider, Drawer, Toolbar, IconButton, List, ListItemButton, Divider, ListItemIcon, ListItemText, Link } from '@mui/material'
-import { AltRoute, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPasteGo, CurrencyExchange, DesignServices, EventSeat, Home, Label, Menu, QrCode } from '@mui/icons-material'
+import { AltRoute, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPaste, CurrencyExchange, DesignServices, EventSeat, Home, Label, Menu, QrCode, Receipt, Source, Store } from '@mui/icons-material'
 import Employee from './links/Employee'
 import Progress from './shared/Progress'
 import Position from './links/Position'
@@ -21,8 +22,11 @@ import Slide from './links/Slide'
 import Currency from './links/Currency'
 import SpecsValueMod from './links/SpecsValueMod'
 import Content from './links/Content'
-
-const drawerWidth = 180
+import Supplier from './links/Supplier'
+import PurchaseInvoice from './links/PurchaseInvoice'
+//#endregion
+//#region theming
+const drawerWidth = 190
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -140,6 +144,13 @@ const theme = createTheme(
           }
         }
       },
+      MuiInputBase: {
+        styleOverrides: {
+          input: {
+            padding: 0.5
+          }
+        }
+      },
       MuiAccordion: {
         styleOverrides: {
           root: {
@@ -172,6 +183,14 @@ const theme = createTheme(
           }
         }
       },
+      MuiTableCell: {
+        styleOverrides: {
+          root: {
+            lineHeight: 1,
+            padding: '1px 4px'
+          }
+        }
+      },
       MuiCheckbox: {
         styleOverrides: {
           root: {
@@ -182,13 +201,16 @@ const theme = createTheme(
     }
   }
 )
+//#endregion
 
 function App() {
   const [authState, setAuthState] = useState(null)
   const [token, setToken] = useState(null)
   const loginResult = { success: 0, fail: 1 }
-  function setCredentials(token) {
-    document.cookie = `adm=${token}; max-age=561600; samesite=none; secure`
+  function setCredentials(cookie, token) {
+    document.cookie = `${cookie}=${token}; max-age=561600; samesite=none; secure`
+    // empty cookie, only for check is admin logged in
+    document.cookie = `user={}; max-age=561600; samesite=none; secure`
     setToken(token)
     setAuthState(true)
   }
@@ -221,13 +243,16 @@ function App() {
     ct: 'category',
     cr: 'currency',
     em: 'employee',
+    en: 'entry',
     l: 'login',
     li: 'line',
     ml: 'model',
     po: 'position',
+    pi: 'purchaseInvoice',
     pr: 'product',
     sl: 'slide',
     sp: 'spec',
+    su: 'supplier',
     sv: 'specsvalue',
     svm: 'specsvaluemod',
     wr: 'warranty',
@@ -240,7 +265,7 @@ function App() {
     async function isLogged() {
       console.log('isLogged')
       const c = document.cookie
-      if (c.includes('adm=')) {
+      if (c.includes('user=')) {
         console.log('afterLogged')
         try {
           const response = await fetch(`${config.apibase}${apis.l}`, {
@@ -250,7 +275,7 @@ function App() {
           if (response.ok) {
             const loginResponse = await response.json()
             if (loginResponse.result === loginResult.success)
-              setCredentials(loginResponse.data)
+              setCredentials(loginResponse.text, loginResponse.data)
             else
               removeCredentials()
           }
@@ -287,7 +312,7 @@ function App() {
       if (response.ok) {
         const loginResponse = await response.json()
         if (loginResponse.result === loginResult.success) {
-          setCredentials(loginResponse.data)
+          setCredentials(loginResponse.text, loginResponse.data)
         }
         else {
           setLoginError(config.text.loginError)
@@ -348,9 +373,9 @@ function App() {
     'model/:pro/:id': [null, <Model api={apis.ml} dataFrom={[apis.br, apis.li, apis.sp]} />],
     specs: [<Assignment />, <Models models={config.text.specs} api={apis.sp} api2={`${apis.sv}s`} pro={true} />],
     'spec/:pro/:id': [null, <Spec api={apis.sp} />],
-    'specsvalues/spec/:id/:name': [null, <Models models={config.text.specsvalues} api={apis.sv} addapi={apis.sp} api2={`${apis.svm}s`} pro={true} />],
+    'specsvalues/spec/:parentId/:name': [null, <Models models={config.text.specsvalues} api={apis.sv} addapi={apis.sp} api2={`${apis.svm}s`} pro={true} />],
     'specsvalue/:pro/:id/:parId/:name': [null, <SpecsValue api={apis.sv} dataFrom={apis.sp} />],
-    'specsvaluemods/specsvalue/:id/:name': [null, <Models models={config.text.specsvaluemods} api={apis.svm} addapi={apis.sv} pro={true} />],
+    'specsvaluemods/specsvalue/:parentId/:name': [null, <Models models={config.text.specsvaluemods} api={apis.svm} addapi={apis.sv} pro={true} />],
     'specsvaluemod/:pro/:id/:parId/:name': [null, <SpecsValueMod api={apis.svm} />],
     products: [<QrCode />, <Models models={config.text.products} api={apis.pr} pro={true} />],
     'product/:pro/:id/': [null, <Product api={apis.pr} dataFrom={[apis.ct, apis.tp, apis.br, apis.li, apis.ml, apis.wr, apis.sp]} />],
@@ -360,11 +385,16 @@ function App() {
     'currency/:pro/:id': [null, <Currency api={apis.cr} />],
     slides: [<BurstMode />, <Models models={config.text.slides} api={apis.sl} pro={true} />],
     'slide/:pro/:id': [null, <Slide api={apis.sl} />],
+    suppliers: [<Store />, <Models models={config.text.suppliers} api={apis.su} pro={true} />],
+    'supplier/:pro/:id': [null, <Supplier api={apis.su} />],
+    purchaseInvoices: [<Receipt />, <Models models={config.text.purchaseInvoices} api={apis.pi} />],
+    'purchaseInvoice/:pro/:id': [null, <PurchaseInvoice api={apis.pi} addapi={apis.pr} dataFrom={[apis.cr, apis.su]} />],
     employees: [<Badge />, <Models models={config.text.employees} api={apis.em} />],
     'employee/:pro/:id': [null, <Employee api={apis.em} dataFrom={apis.po} />],
     positions: [<EventSeat />, <Models models={config.text.positions} api={apis.po} pro={true} />],
     'position/:pro/:id': [null, <Position api={apis.po} />],
-    content: [<ContentPasteGo />, <Content api={apis.co} />]
+    content: [<Source />, <Content api={apis.co} />],
+    entries: [<ContentPaste />, <Models models={config.text.entries} api={apis.en} />],
   }
 
   return (

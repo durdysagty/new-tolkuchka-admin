@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import config from '../configs/config.json'
 import { getData } from '../shared/getData'
-import { Box, Checkbox, FormHelperText, Grid, IconButton, SwipeableDrawer, Table, TableBody, TableCell, TableRow, Typography } from '@mui/material'
+import { Box, Checkbox, FormHelperText, Grid, IconButton, InputLabel, SwipeableDrawer, Table, TableBody, TableCell, TableRow, Typography } from '@mui/material'
 import EditCell from './EditCell'
-import TableHead from './TableHeader'
+import TableHeader from './TableHeader'
 import PageHeader from './PageHeader'
 import { RemoveModal } from './RemoveModal'
 import Progress from './Progress'
@@ -13,7 +13,7 @@ import { Check, Close, FilterAlt, KeyboardArrowLeft, KeyboardArrowRight, Keyboar
 
 export default function Models(props) {
 
-    const { id } = useParams()
+    const { parentId } = useParams()
     const { name } = useParams()
     const [models, setModels] = useState(null)
     const [keys, setKeys] = useState(null)
@@ -30,7 +30,7 @@ export default function Models(props) {
 
     useEffect(() => {
         setApi(props.api)
-        const query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${id === undefined ? '' : `/${id}`}`
+        const query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${parentId === undefined ? '' : `/${parentId}`}`
         async function getModels() {
             console.log('getModels')
             const result = await getData(query)
@@ -40,6 +40,11 @@ export default function Models(props) {
                     if (result.data.length > 0)
                         setKeys(Object.keys(result.data[0]))
                     setDrawer(false)
+                    setFilters(null)
+                    setSelectedFilters({})
+                    setPage(0)
+                    setLastPage(null)
+                    setPagination(null)
                 }
                 else {
                     setModels(result.data.models)
@@ -47,13 +52,19 @@ export default function Models(props) {
                         setKeys(Object.keys(result.data.models[0]))
                     const fs = {}
                     result.data.filters.forEach(async (f) => {
-                        const result = await getData(`${f}`)
-                        if (result.ok) {
-                            fs[f] = result.data
-                            selectedFilters[f] = []
+                        if (!f.includes(" ")) {
+                            const result = await getData(`${f}`)
+                            if (result.ok) {
+                                fs[f] = result.data
+                                selectedFilters[f] = []
+                            }
+                            else
+                                setError(config.text.wrong)
                         }
-                        else
-                            setError(config.text.wrong)
+                        else {
+                            fs[f] = []
+                            selectedFilters[f.split(" ")[1]] = []
+                        }
                     })
                     setLastPage(result.data.lastPage)
                     setPagination(result.data.pagination)
@@ -67,15 +78,11 @@ export default function Models(props) {
         if (models === null && api === props.api)
             getModels()
         else if (models !== null && api !== props.api) {
-            setSelectedFilters({})
-            setPage(0)
-            setLastPage(null)
-            setPagination(null)
             getModels()
         }
         console.log('effect')
-    }, [models, api, props.api, props.addapi, id, filters, selectedFilters])
-
+    }, [models, api, props.api, props.addapi, parentId, filters, selectedFilters])
+    // #region functions
     const [toDelete, setToDelete] = useState(null)
 
     function prepareDelete(id) {
@@ -114,18 +121,15 @@ export default function Models(props) {
         modalRef.current.handleClose()
     }
 
-
     async function getModelsShort(page) {
         console.log('getModelsShort')
         setPage(page)
-        console.log(selectedFilters)
-        let query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${id === undefined ? '' : `/${id}`}?`
+        let query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${parentId === undefined ? '' : `/${parentId}`}?`
         for (let key in selectedFilters) {
             for (let i = 0; i < selectedFilters[key].length; i++)
                 query += `${key}=${selectedFilters[key][i]}&`
         }
         query += `page=${page}`
-        console.log(query)
         const result = await getData(query)
         if (result.ok) {
             if (result.data.filters === undefined)
@@ -139,15 +143,50 @@ export default function Models(props) {
         else
             setError(config.text.wrong)
     }
+    // get filters that depends on parent
+    async function getDependentFilterData(key) {
+        console.log('getFilterShort')
+        const apis = key.split(" ")
+        // get key of dependence selectedFilter
+        const filterKey = apis[0].replace('Id', '')
+        if (selectedFilters[filterKey].length > 0) {
+            let query = `${apis[1]}?`
+            for (let i = 0; i < selectedFilters[filterKey].length; i++)
+                query += `${apis[0]}=${selectedFilters[filterKey][i]}&`
+            const result = await getData(query)
+            console.log(query)
+            if (result.ok) {
+                filters[key] = result.data
+            }
+            else
+                setError(config.text.wrong)
+        }
+        else
+            filters[key] = []
+    }
 
-    function querySet(e, key) {
-        // const sf = Object.assign({}, selectedFilters)
-        if (e.target.checked)
-            selectedFilters[key].push(e.target.value)
+    function querySet(e, key, dependent) {
+        if (dependent) {
+            if (e.target.checked)
+                selectedFilters[key][0] = e.target.value
+            else {
+                selectedFilters[key].splice(selectedFilters[key].indexOf(e.target.value), 1)
+            }
+        }
         else {
-            selectedFilters[key].splice(selectedFilters[key].indexOf(e.target.value), 1)
+            if (e.target.checked)
+                selectedFilters[key].push(e.target.value)
+            else {
+                selectedFilters[key].splice(selectedFilters[key].indexOf(e.target.value), 1)
+            }
         }
         getModelsShort(0)
+        const keys = Object.keys(filters)
+        const dependentFilterKey = keys.find(k => {
+            return k.includes(`${key}Id`)
+        })
+        if (dependentFilterKey !== undefined)
+            getDependentFilterData(dependentFilterKey)
     }
 
     function queryPage(p) {
@@ -155,6 +194,9 @@ export default function Models(props) {
             getModelsShort(p)
         }
     }
+    //#endregion
+
+    const pageHeader = props.selectable ? <InputLabel>Список</InputLabel> : <PageHeader models={props.models} name={name} path={`/${props.api}/scr/0${props.addapi === undefined ? '' : `/${parentId}/${name}`}`} />
 
     return (models === null ?
         <Progress /> :
@@ -162,7 +204,7 @@ export default function Models(props) {
             {drawer ?
                 <Grid container>
                     <Grid item xs={11}>
-                        <PageHeader models={props.models} name={name} path={`/${props.api}/scr/0${props.addapi === undefined ? '' : `/${id}/${name}`}`} />
+                        {pageHeader}
                     </Grid>
                     <Grid item xs={1}>
                         <IconButton onClick={() => setDrawerOpen(true)}>
@@ -170,14 +212,14 @@ export default function Models(props) {
                         </IconButton>
                     </Grid>
                 </Grid> :
-                <PageHeader models={props.models} name={name} path={`/${props.api}/scr/0${props.addapi === undefined ? '' : `/${id}/${name}`}`} />
+                pageHeader
             }
             <FormHelperText error>{error}</FormHelperText>
             {models.length === 0 ?
                 <Typography>{config.text.noObject}</Typography> :
                 props.api === 'category' ?
                     <Table size='small'>
-                        <TableHead data={keys.slice(-2)} />
+                        <TableHeader data={keys.slice(-2)} />
                         <TableBody>
                             {models.map(a => {
                                 const padding = a.padding
@@ -192,14 +234,16 @@ export default function Models(props) {
                         </TableBody>
                     </Table> :
                     <Table size='small'>
-                        <TableHead data={keys} />
+                        <TableHeader data={keys} human={props.api === 'employee' ? true : false} />
                         <TableBody>
                             {models.map(a => (
                                 <TableRow key={a.id}>
-                                    {keys.map((k, i) => (<TableCell key={i}>{typeof (a[k]) === 'boolean' ? a[k] ? <Check color='success' /> : <Close color='error' /> : a[k]}</TableCell>
-                                    ))}
+                                    {keys.map((k, i) => (<TableCell key={i}>{typeof (a[k]) === 'boolean' ? a[k] ? <Check color='success' /> : <Close color='error' /> : k === 'date' ? new Date(a[k]).toLocaleString() : a[k]}</TableCell>))}
                                     <TableCell>
-                                        <EditCell api={props.api} id={a.id} api2={props.api2} parId={id} parName={name} name={a.name} delete={() => prepareDelete(a.id)} pro={props.pro} />
+                                        {props.selectable ?
+                                            <Checkbox checked={props.selectedIds.includes(a.id)} onChange={e => props.handleCheck(a.id, e)} value={a.name} /> :
+                                            <EditCell api={props.api} id={a.id} api2={props.api2} parId={parentId} parName={name} name={a.name} delete={() => prepareDelete(a.id)} pro={props.pro} />
+                                        }
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -219,12 +263,26 @@ export default function Models(props) {
             <RemoveModal ref={modalRef} delete={isDelete => deleteModel(isDelete)} />
             {drawer ? <SwipeableDrawer anchor='right' open={drawerOpen} onOpen={() => setDrawerOpen(true)} onClose={() => setDrawerOpen(false)}>
                 <Box sx={{ width: 370 }} mt={8} px={2}>
-                    {filters !== null ? Object.keys(filters).map(f => {
+                    {filters !== null ? Object.keys(filters).sort((a, b) => {
+                        let x = a.includes(" ") ? 1 : 0
+                        let y = b.includes(" ") ? 1 : 0
+                        if (x < y) { return -1 }
+                        else if (x > y) { return 1 }
+                        else if (x === 0 && y === 0) {
+                            x = a.toLowerCase();
+                            y = b.toLowerCase();
+                            if (x < y) { return 1; }
+                            if (x > y) { return -1; }
+                        }
+                        return 0
+                    }).map(f => {
+                        const dependent = f.includes(" ")
+                        const key = dependent ? f.split(" ")[1] : f
                         return <Box key={f} mt={2} maxHeight={350} sx={{ overflowY: 'scroll' }}>
-                            <strong>{config.text[f]}</strong>
+                            <strong>{config.text[key]}</strong>
                             <Box p={1}>
                                 {filters[f].map(d => (<Box sx={{ paddingLeft: d.padding }} key={d.id}>
-                                    <Checkbox checked={selectedFilters[f].includes(`${d.id}`)} onChange={e => querySet(e, f)} value={d.id} />
+                                    <Checkbox checked={selectedFilters[key].includes(`${d.id}`)} onChange={e => querySet(e, key, dependent)} value={d.id} />
                                     {d.name}
                                 </Box>))}
                             </Box>

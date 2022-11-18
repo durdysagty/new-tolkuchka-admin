@@ -32,6 +32,7 @@ const IMAGESMAX = 5
 
 export default function Product(props) {
 
+    //#region states
     const { id } = useParams()
     const navigate = useNavigate()
     const [product, setProduct] = useState(x)
@@ -57,7 +58,7 @@ export default function Product(props) {
     const [warranties, setWarranties] = useState(null)
     const [getAdditional, setGetAdditional] = useState(false)
     const [once, setOnce] = useState(0)
-
+    //#endregion
     useEffect(() => {
         if (once !== 1)
             setOnce(1)
@@ -68,17 +69,17 @@ export default function Product(props) {
                 setCategories(result.data)
             else
                 setError(config.text.wrong)
-            result = await getData(`${props.dataFrom[1]}`)
+            result = await getData(props.dataFrom[1])
             if (result.ok)
                 setTypes(result.data)
             else
                 setError(config.text.wrong)
-            result = await getData(`${props.dataFrom[2]}`)
+            result = await getData(props.dataFrom[2])
             if (result.ok)
                 setBrands(result.data)
             else
                 setError(config.text.wrong)
-            result = await getData(`${props.dataFrom[5]}`)
+            result = await getData(props.dataFrom[5])
             if (result.ok)
                 setWarranties(result.data)
             else
@@ -131,9 +132,9 @@ export default function Product(props) {
                 console.log('getModels')
                 if (product.lineId === null)
                     product.lineId = ''
-                let result = await getData(`${props.dataFrom[4]}?brandId=${product.brandId}&lineId=${product.lineId}`)
+                let result = await getData(`${props.dataFrom[4]}?brand=${product.brandId}&line=${product.lineId}&&pp=100`)
                 if (result.ok)
-                    setModels(result.data)
+                    setModels(result.data.models)
                 else
                     setError(config.text.wrong)
             }
@@ -211,7 +212,7 @@ export default function Product(props) {
         if (product.brandId !== '' && once === 1)
             additionalData()
     }, [once, props.api, props.dataFrom, categories, id, product, stepParents, product.categoryId, toSelect, getLines, getModels, getSpecs, getAdditional])
-
+    // #region functions
     function handleChange(e, i) {
         if (e.target.name === 'image') {
             if (id !== '0') {
@@ -249,10 +250,11 @@ export default function Product(props) {
         }
         if (e.target.name === 'lineId') {
             setProduct(prevState => ({ ...prevState, modelId: '' }))
-            if (e.target.checked)
-                setGetModels(true)
-            if (!e.target.checked)
-                setModels(null)
+            setModels(null)
+            if (!e.target.checked) {
+                setProduct(prevState => ({ ...prevState, lineId: '' }))
+            }
+            setGetModels(true)
             setSpecs(null)
             setProductSpecsValues([])
         }
@@ -318,8 +320,8 @@ export default function Product(props) {
 
     const [submitError, setSubmitError] = useState('')
 
-
     const { pro } = useParams()
+    //#endregion
     async function submit(e) {
         e.preventDefault()
         let i = id
@@ -375,7 +377,7 @@ export default function Product(props) {
                 <AccordionList list={models} name={keys[5]} handleChange={handleChange} accId='model' dtlId='models' req={true} error={error} validation={validation[keys[5]]} id={id !== '0' ? product.modelId : undefined} />
                 <AccordionList list={warranties} name={keys[6]} handleChange={handleChange} accId='warranty' dtlId='warranties' req={true} error={error} validation={validation[keys[6]]} id={id !== '0' ? product.warrantyId : undefined} />
                 {keys.slice(7, 9).map((text, i) => (
-                    <TextField type='number' inputProps={{ step: '0.01' }} label={config.text[text]} name={text} onChange={handleChange} value={product[text]} key={i} required={i === 0 ? true : false} helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
+                    <TextField type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} inputProps={{ step: '0.01' }} label={config.text[text]} name={text} onChange={handleChange} value={product[text]} key={i} required={i === 0 ? true : false} helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
                 ))}
                 <Box my={3}>
                     {keys.slice(-4).map((text, i) => (

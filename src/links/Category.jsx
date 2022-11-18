@@ -123,7 +123,7 @@ export default function Category(props) {
             }
         }
     }, [once, props.api, categories, id, category, stepParents, hasProduct, category.parentId])
-
+    //#region functions 
     function handleChange(e) {
         if (e.target.name === keys[5] || e.target.name === keys[6])
             setCategory(prevState => ({ ...prevState, [e.target.name]: e.target.checked }))
@@ -153,6 +153,7 @@ export default function Category(props) {
     const [submitError, setSubmitError] = useState('')
 
     const { pro } = useParams()
+    //#endregion
     async function submit(e) {
         e.preventDefault()
         let i = id

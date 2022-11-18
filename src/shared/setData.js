@@ -1,5 +1,7 @@
 import config from '../configs/config.json'
 
+// api - the route
+// id - model id, used to determine is model to put or to post, if put - then used for modelId
 export async function setFormData(api, id, data, images = null, optional = null) {
     console.log('setFormData')
     try {
@@ -11,17 +13,21 @@ export async function setFormData(api, id, data, images = null, optional = null)
             formData.append(key, data[key])
         }
         if (optional !== null) {
-            for (let key in optional) {
+            for (let key in optional)
                 if (optional[key] !== null)
-                    for (let o of optional[key]) {
-                        if (Array.isArray(o)) {
-                            for (let i = 0; i < o.length; i++)
-                                formData.append(`${key}[${optional[key].indexOf(o)}]`, o[i])
+                    if (typeof optional[key] === 'string')
+                        formData.append(key, optional[key])
+                    else
+                        for (let o of optional[key]) {
+                            if (Array.isArray(o)) {
+                                // this option used for datas like IList<int[]> (ModelController POST, PUT)
+                                for (let i = 0; i < o.length; i++)
+                                    formData.append(`${key}[${optional[key].indexOf(o)}]`, o[i])
+                            }
+                            else
+                                // this option used for simple objects in array like int[] or IList<int> (ProductController POST, PUT)
+                                formData.append(key, o)
                         }
-                        else
-                            formData.append(key, o)
-                    }
-            }
         }
         if (images !== null)
             for (let i of images)

@@ -64,7 +64,7 @@ export default function Model(props) {
         }
         async function additionalData() {
             console.log('additionalData')
-            let result = await getData(`${props.dataFrom[1]}?brandId=${model.brandId}`)
+            let result = await getData(`${props.dataFrom[1]}?brand=${model.brandId}`)
             if (result.ok)
                 setLines(result.data)
             else
@@ -79,23 +79,6 @@ export default function Model(props) {
     function handleCheck(array) {
         setSelectedSpecs(array)
     }
-    // function handleCheck(e) {
-    //     const array = selectedSpecs.slice()
-    //     if (e.target.checked)
-    //         array.push([e.target.value, 0])
-    //     else
-    //         array.splice(array.indexOf(array.find(el => el[0] === e.target.value)), 1)
-    //     setSelectedSpecs(array)
-    // }
-
-    // function handleCheck2(e) {
-    //     const array = selectedSpecs.slice()
-    //     if (e.target.checked)
-    //         array.push([e.target.value, 0])
-    //     else
-    //         array.splice(array.indexOf(array.find(el => el[0] === e.target.value)), 1)
-    //     setSelectedSpecs(array)
-    // }
 
     function handleChange(e) {
         setModel(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -148,7 +131,7 @@ export default function Model(props) {
                 <AccordionList list={lines} name={keys[2]} handleChange={handleChange} accId='line' dtlId='lines' req={false} error={error} validation={validation[keys[2]]} id={id !== '0' ? model.lineId : undefined} />
                 <ListMany list={specs} name='specs' handleChange={handleCheck} mainText='specs' secondText='isNameUse' req={false} checkList={id !== '0' ? selectedSpecs : undefined} />
                 {keys.slice(-3).map((text, i) => (
-                    <TextField key={i} type='text' label={config.text[text]} name={text} onChange={handleChange} value={model[text]} />
+                    <TextField key={i} type='text' label={config.text[text]} name={text} onChange={handleChange} value={model[text]} required helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
                 ))}
                 <SubmitButton id={id} pro={pro} />
             </Box >
