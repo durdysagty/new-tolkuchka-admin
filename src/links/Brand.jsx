@@ -92,7 +92,7 @@ export default function Brand(props) {
             <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' >
                 <FormHelperText error>{submitError}</FormHelperText>
                 <TextField type='text' label={config.text.name} name={keys[0]} onChange={handleChange} value={brand.name} required helperText={error ? validation.name : ''} error={error && validation.name !== '' ? true : false} />
-                <ImageUpload handleChange={handleChange} id={id} error={error} validation={validation} />
+                <ImageUpload handleChange={handleChange} id={id} error={error} validation={validation} image='brand' />
                 <SubmitButton id={id} pro={pro} />
             </Box >
         </Box>

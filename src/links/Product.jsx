@@ -229,6 +229,12 @@ export default function Product(props) {
         }
         else if (e.target.name === keys[9] || e.target.name === keys[10] || e.target.name === keys[11] || e.target.name === keys[12])
             setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.checked }))
+        // else if (e.target.name === keys[7] || e.target.name === keys[8]) {
+        //     let v = parseFloat(e.target.value)
+        //     v = v.toLocaleString()
+        //     console.log(v)
+        //     setProduct(prevState => ({ ...prevState, [e.target.name]: v }))
+        // }
         else
             setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
         setValidation(prevState => ({
@@ -247,6 +253,7 @@ export default function Product(props) {
             }
             setSpecs(null)
             setProductSpecsValues([])
+            setProductSpecsValueMods([])
         }
         if (e.target.name === 'lineId') {
             setProduct(prevState => ({ ...prevState, modelId: '' }))
@@ -257,6 +264,7 @@ export default function Product(props) {
             setGetModels(true)
             setSpecs(null)
             setProductSpecsValues([])
+            setProductSpecsValueMods([])
         }
         if (e.target.name === 'modelId') {
             setSpecs(null)
@@ -265,6 +273,7 @@ export default function Product(props) {
             if (e.target.checked)
                 setGetSpecs(true)
         }
+        console.log(product)
     }
 
     function handleSpecs(e, id, parentId) {
@@ -324,6 +333,10 @@ export default function Product(props) {
     //#endregion
     async function submit(e) {
         e.preventDefault()
+        if (specs.length > productSpecsValues.length) {
+            setSubmitError(config.text.notAllSpecs)
+            return
+        }
         let i = id
         if (pro === 'sim')
             i = '0'
@@ -335,6 +348,12 @@ export default function Product(props) {
                     break
                 imagesArray.push(images[i])
             }
+        }
+        product.price = parseFloat(product.price)
+        product.price = product.price.toLocaleString()
+        if (product.newPrice !== '') {
+            product.newPrice = parseFloat(product.newPrice)
+            product.newPrice = product.newPrice.toLocaleString()
         }
         const response = await setFormData(props.api, i, product, imagesArray, {
             adLinks: stepParents.length > 0 ? stepParents : null,
@@ -371,13 +390,13 @@ export default function Product(props) {
                         {selectStepCats}
                     </AccordionDetails>
                 </Accordion>
-                <AccordionList list={types} name={keys[2]} handleChange={handleChange} accId='type' dtlId='types' req={true} error={error} validation={validation[keys[2]]} id={id !== '0' ? product.typeId : undefined} />
-                <AccordionList list={brands} name={keys[3]} handleChange={handleChange} accId='brand' dtlId='brands' req={true} error={error} validation={validation[keys[3]]} id={id !== '0' ? product.brandId : undefined} />
-                <AccordionList list={lines} name={keys[4]} handleChange={handleChange} accId='line' dtlId='lines' req={false} error={error} validation={validation[keys[4]]} id={id !== '0' ? product.lineId : undefined} />
-                <AccordionList list={models} name={keys[5]} handleChange={handleChange} accId='model' dtlId='models' req={true} error={error} validation={validation[keys[5]]} id={id !== '0' ? product.modelId : undefined} />
-                <AccordionList list={warranties} name={keys[6]} handleChange={handleChange} accId='warranty' dtlId='warranties' req={true} error={error} validation={validation[keys[6]]} id={id !== '0' ? product.warrantyId : undefined} />
+                <AccordionList list={types} name={keys[2]} handleChange={handleChange} accId='type' dtlId='types' req={true} error={error} validation={validation[keys[2]]} id={product.typeId} />
+                <AccordionList list={brands} name={keys[3]} handleChange={handleChange} accId='brand' dtlId='brands' req={true} error={error} validation={validation[keys[3]]} id={product.brandId} />
+                <AccordionList list={lines} name={keys[4]} handleChange={handleChange} accId='line' dtlId='lines' req={false} error={error} validation={validation[keys[4]]} id={product.lineId} />
+                <AccordionList list={models} name={keys[5]} handleChange={handleChange} accId='model' dtlId='models' req={true} error={error} validation={validation[keys[5]]} id={product.modelId} />
+                <AccordionList list={warranties} name={keys[6]} handleChange={handleChange} accId='warranty' dtlId='warranties' req={true} error={error} validation={validation[keys[6]]} id={product.warrantyId} />
                 {keys.slice(7, 9).map((text, i) => (
-                    <TextField type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} inputProps={{ step: '0.01' }} label={config.text[text]} name={text} onChange={handleChange} value={product[text]} key={i} required={i === 0 ? true : false} helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
+                    <TextField type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} inputProps={{ step: '0.10' }} label={config.text[text]} name={text} onChange={handleChange} value={product[text]} key={i} required={i === 0 ? true : false} helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
                 ))}
                 <Box my={3}>
                     {keys.slice(-4).map((text, i) => (
@@ -409,7 +428,7 @@ export default function Product(props) {
                     </Table>
                 }
                 {id === '0' ?
-                    <ImageUpload handleChange={handleChange} multiple={true} id={id} error={error} validation={validation} /> :
+                    <ImageUpload handleChange={handleChange} multiple={true} id={id} error={error} validation={validation} image='product' /> :
                     <Grid container mt={3}>
                         {[0, 1, 2, 3, 4].map((i) => {
                             const name = `${id}-${i}.jpg`

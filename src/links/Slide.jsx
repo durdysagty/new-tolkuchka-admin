@@ -60,11 +60,11 @@ export default function Slide(props) {
     function handleChange(e) {
         if (e.target.name === 'imageru')
             setImageru(e.target.files[0])
-        if (e.target.name === 'imageen')
+        else if (e.target.name === 'imageen')
             setImageen(e.target.files[0])
-        if (e.target.name === 'imagetm')
+        else if (e.target.name === 'imagetm')
             setImagetm(e.target.files[0])
-        if (e.target.name === keys[3])
+        else if (e.target.name === keys[3])
             setSlide(prevState => ({ ...prevState, [e.target.name]: e.target.checked }))
         else
             setSlide(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -120,13 +120,13 @@ export default function Slide(props) {
                 {keys.slice(0, 2).map((text, i) => (
                     <TextField type='text' label={config.text[text]} name={text} onChange={handleChange} value={slide[text]} key={i} required helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
                 ))}
-                <AccordionList list={layout} name={keys[1]} handleChange={handleChange} accId='layout' dtlId='layouts' req={true} error={error} validation={validation[keys[1]]} id={id !== '0' ? slide.layout : undefined} />
+                <AccordionList list={layout} name={keys[2]} handleChange={handleChange} accId='layout' dtlId='layouts' req={true} error={error} validation={validation[keys[1]]} id={id !== '0' ? slide.layout : undefined} />
                 <InputLabel error={error && (validation.imageru !== '' && validation.imageru !== undefined)}>{config.text.ruVer}</InputLabel>
-                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imageru' validation={validation} required={pro === 'sim' && (imageen !== null || imagetm !== null)} />
+                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imageru' validation={validation} required={pro === 'sim' && (imageen !== null || imagetm !== null)} image={slide.layout === '1' ? 'slideleft' : 'slide'} />
                 <InputLabel error={error && (validation.imageen !== '' && validation.imageen !== undefined)}>{config.text.enVer}</InputLabel>
-                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imageen' validation={validation} required={pro === 'sim' && (imageru !== null || imagetm !== null)} />
+                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imageen' validation={validation} required={pro === 'sim' && (imageru !== null || imagetm !== null)} image={slide.layout === '1' ? 'slideleft' : 'slide'} />
                 <InputLabel error={error && (validation.imagetm !== '' && validation.imagetm !== undefined)}>{config.text.tmVer}</InputLabel>
-                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imagetm' validation={validation} required={pro === 'sim' && (imageru !== null || imageen !== null)} />
+                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imagetm' validation={validation} required={pro === 'sim' && (imageru !== null || imageen !== null)} image={slide.layout === '1' ? 'slideleft' : 'slide'} />
                 <Grid container sx={{ display: 'flex' }}>
                     <Grid item xs={5} sm={2} lg={1}>
                         <InputLabel>{config.text.notInUse}</InputLabel>

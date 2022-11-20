@@ -73,7 +73,7 @@ export default function AccordionList(props) {
         else {
             setToSelect(false)
         }
-        return setId(null)
+        // return setId(null)
     }, [toSelect, props, props.id, id, selected, list])
 
     return <Accordion>

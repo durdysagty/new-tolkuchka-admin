@@ -109,7 +109,7 @@ export default function SpecsValue(props) {
                 {keys.slice(-3).map((text, i) => (
                     <TextField type='text' label={config.text[text]} name={text} onChange={handleChange} value={specsValue[text]} key={i} required helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
                 ))}
-                {isImaged ? <ImageUpload required={true} handleChange={handleChange} id={id} error={error} validation={validation} notRequired={true} /> : null}
+                {isImaged ? <ImageUpload required={true} handleChange={handleChange} id={id} error={error} validation={validation} notRequired={true} image='specsValue' /> : null}
                 <SubmitButton id={id} pro={pro} />
             </Box >
         </Box>
