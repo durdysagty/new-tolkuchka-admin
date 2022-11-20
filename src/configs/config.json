@@ -1,5 +1,5 @@
 {
-    "apibase": "https://localhost:7240/",
+    "apibase": "https://new.tolkuchka.bar/",
     "api": "api/",
     "centerBox": {
         "flex": 1,
@@ -132,6 +132,14 @@
         "supplierName": "Поставщик",
         "currencyCodeName": "Валюта",
         "currencyRate": "Курс",
-        "purchases": "Наименования"
+        "purchases": "Наименования",
+        "notAllSpecs": "Вы не заполнили все значения характеристик."
+    },
+    "image": {
+        "brand": "180x60",
+        "product": "600x600",
+        "slide": "990x450",
+        "slideleft": "220x300",
+        "specsValue": "25x25"
     }
 }
