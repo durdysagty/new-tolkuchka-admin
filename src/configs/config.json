@@ -1,5 +1,5 @@
 {
-    "apibase": "https://new.tolkuchka.bar/",
+    "apibase": "https://localhost:7240/",
     "api": "api/",
     "centerBox": {
         "flex": 1,

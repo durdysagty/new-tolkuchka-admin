@@ -207,17 +207,15 @@ function App() {
   const [authState, setAuthState] = useState(null)
   const [token, setToken] = useState(null)
   const loginResult = { success: 0, fail: 1 }
-  function setCredentials(cookie, token) {
-    document.cookie = `${cookie}=${token}; max-age=561600; samesite=none; secure`
-    // empty cookie, only for check is admin logged in
-    document.cookie = `user={}; max-age=561600; samesite=none; secure`
+  function setCredentials(token) {
+    document.cookie = `user={}; max-age=345600; samesite=strict; secure`
+    localStorage.setItem('MIT', token)
     setToken(token)
     setAuthState(true)
   }
   function removeCredentials() {
-    document.cookie = `adm=; max-age=-1`
-    setToken(null)
-    setAuthState(false)
+    localStorage.removeItem("MIT")
+    //window.location.href = '/'
   }
 
   const [openDr, setOpenDr] = useState(false)
@@ -259,39 +257,53 @@ function App() {
     tp: 'type'
   }
 
-  const [cl, setCl] = useState(false)
+  // const [cl, setCl] = useState(false)
   useEffect(() => {
-    setCl(true)
-    async function isLogged() {
-      console.log('isLogged')
-      const c = document.cookie
-      if (c.includes('user=')) {
-        console.log('afterLogged')
-        try {
-          const response = await fetch(`${config.apibase}${apis.l}`, {
-            method: 'GET',
-            credentials: 'include'
-          })
-          if (response.ok) {
-            const loginResponse = await response.json()
-            if (loginResponse.result === loginResult.success)
-              setCredentials(loginResponse.text, loginResponse.data)
-            else
-              removeCredentials()
-          }
-          else
-            removeCredentials()
-        }
-        catch {
-          removeCredentials()
-        }
-      }
+    const c = document.cookie
+    if (c.includes('user=')) {
+      const t = localStorage.getItem("MIT")
+      if (t !== null)
+        setAuthState(true)
       else
         setAuthState(false)
     }
-    if (cl === true)
-      isLogged()
-  }, [cl, apis.l, loginResult.success])
+    else {
+      removeCredentials()
+      setAuthState(false)
+    }
+
+    // setCl(true)
+    // async function isLogged() {
+    //   console.log('isLogged')
+    //   const c = document.cookie
+    //   if (c.includes('user=')) {
+    //     console.log('afterLogged')
+    //     try {
+    //       const response = await fetch(`${config.apibase}${apis.l}`, {
+    //         method: 'GET',
+    //         credentials: 'include'
+    //       })
+    //       if (response.ok) {
+    //         const loginResponse = await response.json()
+    //         if (loginResponse.result === loginResult.success)
+    //           setCredentials(loginResponse.text, loginResponse.data)
+    //         else
+    //           removeCredentials()
+    //       }
+    //       else
+    //         removeCredentials()
+    //     }
+    //     catch {
+    //       removeCredentials()
+    //     }
+    //   }
+    //   else
+    //     setAuthState(false)
+    // }
+    // if (cl === true)
+    //   isLogged()
+    // }, [cl, apis.l, loginResult.success])
+  }, [authState])
 
   const [loginError, setLoginError] = useState('')
 
@@ -312,7 +324,7 @@ function App() {
       if (response.ok) {
         const loginResponse = await response.json()
         if (loginResponse.result === loginResult.success) {
-          setCredentials(loginResponse.text, loginResponse.data)
+          setCredentials(loginResponse.data)
         }
         else {
           setLoginError(config.text.loginError)

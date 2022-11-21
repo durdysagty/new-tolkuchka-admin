@@ -4,7 +4,10 @@ export async function getData(api) {
     try {
         const response = await fetch(`${config.apibase}${config.api}${api}`, {
             method: 'GET',
-            credentials: 'include'
+            credentials: 'include',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("MIT")
+            }
         })
         if (response.ok) {
             const result = await response.json()
@@ -30,7 +33,10 @@ export async function getEditModel(api, id = '') {
     try {
         const response = await fetch(`${config.apibase}${config.api}${api}/${id}`, {
             method: 'GET',
-            credentials: 'include'
+            credentials: 'include',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("MIT")
+            }
         })
         if (response.ok) {
             const result = await response.json()
