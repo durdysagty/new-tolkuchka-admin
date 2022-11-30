@@ -4,7 +4,7 @@ import config from './configs/config.json'
 import { DataContext } from './configs/dataContext'
 import { BrowserRouter, Link as RouterLink, Route, Routes } from 'react-router-dom'
 import { AppBar, Box, Button, createTheme, CssBaseline, FormHelperText, styled, TextField, ThemeProvider, Drawer, Toolbar, IconButton, List, ListItemButton, Divider, ListItemIcon, ListItemText, Link } from '@mui/material'
-import { AltRoute, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPaste, CurrencyExchange, DesignServices, EventSeat, Home, Label, Menu, QrCode, Receipt, Source, Store } from '@mui/icons-material'
+import { AltRoute, Assessment, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPaste, CurrencyExchange, DesignServices, EventSeat, Home, Label, Menu, QrCode, Receipt, ReceiptLong, Source, Store } from '@mui/icons-material'
 import Employee from './links/Employee'
 import Progress from './shared/Progress'
 import Position from './links/Position'
@@ -24,6 +24,10 @@ import SpecsValueMod from './links/SpecsValueMod'
 import Content from './links/Content'
 import Supplier from './links/Supplier'
 import PurchaseInvoice from './links/PurchaseInvoice'
+import Invoice from './links/Invoice'
+import InvoicePrint from './links/InvoicePrint'
+import InvoiceProcess from './links/InvoiceProcess'
+import Report from './links/Report'
 //#endregion
 //#region theming
 const drawerWidth = 190
@@ -151,6 +155,16 @@ const theme = createTheme(
           }
         }
       },
+      MuiListItemButton: {
+        styleOverrides: {
+          root: {
+            paddingLeft: 5,
+            paddingTop: 2,
+            paddingRight: 5,
+            paddingBottom: 2
+          }
+        }
+      },
       MuiAccordion: {
         styleOverrides: {
           root: {
@@ -214,6 +228,7 @@ function App() {
     setAuthState(true)
   }
   function removeCredentials() {
+    document.cookie = `user={}; max-age=-1`
     localStorage.removeItem("MIT")
     //window.location.href = '/'
   }
@@ -242,17 +257,19 @@ function App() {
     cr: 'currency',
     em: 'employee',
     en: 'entry',
-    l: 'login',
+    in: 'invoice',
+    ln: 'login',
     li: 'line',
     ml: 'model',
     po: 'position',
     pi: 'purchaseInvoice',
     pr: 'product',
+    re: 'report',
     sl: 'slide',
     sp: 'spec',
     su: 'supplier',
     sv: 'specsvalue',
-    svm: 'specsvaluemod',
+    sm: 'specsvaluemod',
     wr: 'warranty',
     tp: 'type'
   }
@@ -313,7 +330,7 @@ function App() {
       password: password
     }
     try {
-      const response = await fetch(`${config.apibase}${apis.l}`, {
+      const response = await fetch(`${config.apibase}${apis.ln}`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -385,10 +402,10 @@ function App() {
     'model/:pro/:id': [null, <Model api={apis.ml} dataFrom={[apis.br, apis.li, apis.sp]} />],
     specs: [<Assignment />, <Models models={config.text.specs} api={apis.sp} api2={`${apis.sv}s`} pro={true} />],
     'spec/:pro/:id': [null, <Spec api={apis.sp} />],
-    'specsvalues/spec/:parentId/:name': [null, <Models models={config.text.specsvalues} api={apis.sv} addapi={apis.sp} api2={`${apis.svm}s`} pro={true} />],
+    'specsvalues/spec/:parentId/:name': [null, <Models models={config.text.specsvalues} api={apis.sv} addapi={apis.sp} api2={`${apis.sm}s`} pro={true} />],
     'specsvalue/:pro/:id/:parId/:name': [null, <SpecsValue api={apis.sv} dataFrom={apis.sp} />],
-    'specsvaluemods/specsvalue/:parentId/:name': [null, <Models models={config.text.specsvaluemods} api={apis.svm} addapi={apis.sv} pro={true} />],
-    'specsvaluemod/:pro/:id/:parId/:name': [null, <SpecsValueMod api={apis.svm} />],
+    'specsvaluemods/specsvalue/:parentId/:name': [null, <Models models={config.text.specsvaluemods} api={apis.sm} addapi={apis.sv} pro={true} />],
+    'specsvaluemod/:pro/:id/:parId/:name': [null, <SpecsValueMod api={apis.sm} />],
     products: [<QrCode />, <Models models={config.text.products} api={apis.pr} pro={true} />],
     'product/:pro/:id/': [null, <Product api={apis.pr} dataFrom={[apis.ct, apis.tp, apis.br, apis.li, apis.ml, apis.wr, apis.sp]} />],
     warranties: [<CheckBox />, <Models models={config.text.warranties} api={apis.wr} pro={true} />],
@@ -401,11 +418,16 @@ function App() {
     'supplier/:pro/:id': [null, <Supplier api={apis.su} />],
     purchaseInvoices: [<Receipt />, <Models models={config.text.purchaseInvoices} api={apis.pi} />],
     'purchaseInvoice/:pro/:id': [null, <PurchaseInvoice api={apis.pi} addapi={apis.pr} dataFrom={[apis.cr, apis.su]} />],
+    invoices: [<ReceiptLong />, <Models models={config.text.invoices} api={apis.in} api2='process' api3='print' />],
+    'invoice/:pro/:id': [null, <Invoice api={apis.in} addapi={apis.pr} dataFrom={[apis.cr]} />],
+    'process/invoice/:id': [null, <InvoiceProcess api={apis.in} dataFrom={[apis.pi]} />],
+    'print/invoice/:id': [null, <InvoicePrint api={apis.in} />],
     employees: [<Badge />, <Models models={config.text.employees} api={apis.em} />],
     'employee/:pro/:id': [null, <Employee api={apis.em} dataFrom={apis.po} />],
     positions: [<EventSeat />, <Models models={config.text.positions} api={apis.po} pro={true} />],
     'position/:pro/:id': [null, <Position api={apis.po} />],
     content: [<Source />, <Content api={apis.co} />],
+    report: [<Assessment />, <Report api={apis.re} />],
     entries: [<ContentPaste />, <Models models={config.text.entries} api={apis.en} />],
   }
 

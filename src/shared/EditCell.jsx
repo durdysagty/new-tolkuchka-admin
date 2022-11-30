@@ -1,4 +1,4 @@
-import { ContentCopy, Delete, Edit, EditAttributesSharp } from "@mui/icons-material"
+import { ContentCopy, Delete, Edit, EditAttributesSharp, Print } from "@mui/icons-material"
 import { Box, Link } from "@mui/material"
 import { Link as RouterLink } from 'react-router-dom'
 
@@ -13,6 +13,13 @@ export default function EditCell(props) {
                     null :
                     <Link to={`/${props.api2}/${props.api}/${props.id}${props.name === undefined ? '' : `/${props.name}`}`} component={RouterLink} sx={{ marginLeft: 2 }} >
                         <EditAttributesSharp />
+                    </Link>
+            }
+            {
+                props.api3 === undefined ?
+                    null :
+                    <Link to={`/${props.api3}/${props.api}/${props.id}${props.name === undefined ? '' : `/${props.name}`}`} component={RouterLink} sx={{ marginLeft: 2 }} >
+                        <Print />
                     </Link>
             }
             {

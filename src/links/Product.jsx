@@ -229,12 +229,6 @@ export default function Product(props) {
         }
         else if (e.target.name === keys[9] || e.target.name === keys[10] || e.target.name === keys[11] || e.target.name === keys[12])
             setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.checked }))
-        // else if (e.target.name === keys[7] || e.target.name === keys[8]) {
-        //     let v = parseFloat(e.target.value)
-        //     v = v.toLocaleString()
-        //     console.log(v)
-        //     setProduct(prevState => ({ ...prevState, [e.target.name]: v }))
-        // }
         else
             setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
         setValidation(prevState => ({
@@ -273,7 +267,6 @@ export default function Product(props) {
             if (e.target.checked)
                 setGetSpecs(true)
         }
-        console.log(product)
     }
 
     function handleSpecs(e, id, parentId) {
@@ -434,7 +427,7 @@ export default function Product(props) {
                             const name = `${id}-${i}.jpg`
                             return (<Grid item mx={1} mb={1} key={i}>
                                 <InputLabel id='image' sx={{ cursor: 'pointer', border: 1, borderRadius: '7%', textAlign: 'center' }}>
-                                    <img src={`${config.apibase}images/product/small/${name}?w=64&h=64&fit=crop&auto=format`} srcSet={`${config.apibase}images/products/small/${name}?w=64&h=64&fit=crop&auto=format&dpr=2 2x`} alt={`${product.modelId}-${id}-${i}`} style={{ verticalAlign: 'middle' }} onError={e => e.target.src = `${config.apibase}images/0.jpg?w=64&h=64&fit=crop&auto=format`} />
+                                    <img src={`${config.apibase}images/product/small/${name}?w=64&h=64&fit=crop&auto=format`} srcSet={`${config.apibase}images/products/small/${name}?w=64&h=64&fit=crop&auto=format&dpr=2 2x`} alt={`${product.modelId}-${id}-${i}`} style={{ verticalAlign: 'middle' }} onLoad={e => console.log(e)} onError={e => e.target.src = `${config.apibase}images/0.jpg?w=64&h=64&fit=crop&auto=format`} />
                                     <input name='image' type='file' hidden onChange={e => handleChange(e, i)} accept='image/gif image/png, image/jpeg, image/x-png' />
                                 </InputLabel>
                             </Grid>)

@@ -53,7 +53,6 @@ export default function PurchaseInvoice(props) {
                 setError(config.text.wrong)
             if (id !== '0') {
                 result = await getData(`${props.api}/purchases/${id}`)
-                console.log(result.data)
                 if (result.ok) {
                     result.data.forEach(p => p.purchasePrice = parseFloat(p.purchasePrice))
                     setPurchases(result.data)
@@ -93,11 +92,11 @@ export default function PurchaseInvoice(props) {
         setError(true)
     }
 
-    function handlePurchase(id, e) {
+    function handlePurchase(p, e) {
         const array = purchases.slice()
         if (e !== undefined && e.target.checked) {
             const purchase = {
-                productId: id,
+                productId: p.id,
                 name: e.target.value,
                 serialNumbers: [''],
                 purchasePrice: 0,
@@ -106,7 +105,7 @@ export default function PurchaseInvoice(props) {
             array.push(purchase)
         }
         else {
-            array.splice(array.indexOf(array.find(p => p.productId === id)), 1)
+            array.splice(array.indexOf(array.find(a => a.productId === p.productId)), 1)
         }
         setPurchases(array)
     }
@@ -152,8 +151,8 @@ export default function PurchaseInvoice(props) {
     //#endregion
     async function submit(e) {
         e.preventDefault()
-        console.log(purchases)
-        console.log(purchaseInvoice)
+        // console.log(purchases)
+        // console.log(purchaseInvoice)
         if (purchases.length < 1) {
             setSubmitError(config.text.noPurchase)
             return
@@ -186,7 +185,7 @@ export default function PurchaseInvoice(props) {
                 <Box mb={5}>
                     {purchases.length > 0 ?
                         <Table size='small'>
-                            <TableHeader data={Object.keys(purchases[0])} />
+                            <TableHeader data={Object.keys(purchases[0]).map(k => config.text[k])} />
                             <TableBody>
                                 {purchases.map(p => {
                                     const serials = p.serialNumbers.map((s, i) => <TextField key={i} onChange={e => handleSerialNumber(p.productId, i, e)} type='text' value={s} />)
@@ -207,7 +206,7 @@ export default function PurchaseInvoice(props) {
                                             <TextField type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} required value={p.quantity} onChange={e => handlePurchaseQuantity(p.productId, e)} />
                                         </TableCell>
                                         <TableCell>
-                                            <Delete onClick={() => handlePurchase(p.id)} sx={{ cursor: 'pointer' }} />
+                                            <Delete onClick={() => handlePurchase(p)} sx={{ cursor: 'pointer' }} />
                                         </TableCell>
                                     </TableRow>
                                 })}

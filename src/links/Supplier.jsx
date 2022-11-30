@@ -85,7 +85,7 @@ export default function Supplier(props) {
             <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' >
                 <FormHelperText error>{submitError}</FormHelperText>
                 {keys.map((text, i) => (
-                    <TextField type={text.includes('phone') ? 'number' : 'text'} onKeyDown={text.includes('phone') ? (evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault() : null} label={config.text[text]} name={text} onChange={handleChange} value={supplier[text]} key={i} required={text !== 'phoneSecondary'} helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
+                    <TextField type={text.includes('phone') ? 'number' : 'text'} onKeyDown={text.includes('phone') ? (evt) => config.phoneOnly.includes(evt.key) && evt.preventDefault() : null} label={config.text[text]} name={text} onChange={handleChange} value={supplier[text]} key={i} required={text !== 'phoneSecondary'} helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
                 ))}
                 <SubmitButton id={id} pro={pro} />
             </Box >

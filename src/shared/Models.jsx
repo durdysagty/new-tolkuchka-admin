@@ -30,58 +30,72 @@ export default function Models(props) {
 
     useEffect(() => {
         setApi(props.api)
-        const query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${parentId === undefined ? '' : `/${parentId}`}`
-        async function getModels() {
-            console.log('getModels')
-            const result = await getData(query)
-            if (result.ok) {
-                if (result.data.filters === undefined) {
-                    setModels(result.data)
-                    if (result.data.length > 0)
-                        setKeys(Object.keys(result.data[0]))
-                    setDrawer(false)
-                    setFilters(null)
-                    setSelectedFilters({})
-                    setPage(0)
-                    setLastPage(null)
-                    setPagination(null)
-                }
-                else {
-                    setModels(result.data.models)
-                    if (result.data.models.length > 0)
-                        setKeys(Object.keys(result.data.models[0]))
-                    const fs = {}
-                    result.data.filters.forEach(async (f) => {
-                        if (!f.includes(" ")) {
-                            const result = await getData(`${f}`)
-                            if (result.ok) {
-                                fs[f] = result.data
-                                selectedFilters[f] = []
+        // if models are to be prepared beforhand
+        if (props.list === undefined) {
+            const query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${parentId === undefined ? '' : `/${parentId}`}`
+            async function getModels() {
+                console.log('getModels')
+                const result = await getData(query)
+                if (result.ok) {
+                    if (result.data.filters === undefined) {
+                        setModels(result.data)
+                        if (result.data.length > 0)
+                            prepareKeys(Object.keys(result.data[0]))
+                        setDrawer(false)
+                        setFilters(null)
+                        setSelectedFilters({})
+                        setPage(0)
+                        setLastPage(null)
+                        setPagination(null)
+                    }
+                    else {
+                        setModels(result.data.models)
+                        if (result.data.models.length > 0)
+                            prepareKeys(Object.keys(result.data.models[0]))
+                        const fs = {}
+                        result.data.filters.forEach(async (f) => {
+                            if (!f.includes(" ")) {
+                                const result = await getData(`${f}`)
+                                if (result.ok) {
+                                    fs[f] = result.data
+                                    selectedFilters[f] = []
+                                }
+                                else
+                                    setError(config.text.wrong)
                             }
-                            else
-                                setError(config.text.wrong)
-                        }
-                        else {
-                            fs[f] = []
-                            selectedFilters[f.split(" ")[1]] = []
-                        }
-                    })
-                    setLastPage(result.data.lastPage)
-                    setPagination(result.data.pagination)
-                    setFilters(fs)
-                    setDrawer(true)
+                            else {
+                                fs[f] = []
+                                selectedFilters[f.split(" ")[1]] = []
+                            }
+                        })
+                        setLastPage(result.data.lastPage)
+                        setPagination(result.data.pagination)
+                        setFilters(fs)
+                        setDrawer(true)
+                    }
                 }
+                else
+                    setError(config.text.wrong)
             }
-            else
-                setError(config.text.wrong)
+            if (models === null && api === props.api)
+                getModels()
+            else if (models !== null && api !== props.api) {
+                getModels()
+            }
         }
-        if (models === null && api === props.api)
-            getModels()
-        else if (models !== null && api !== props.api) {
-            getModels()
+        else {
+            if (props.list.length > 0)
+                prepareKeys(Object.keys(props.list[0]))
+            setModels(props.list)
         }
-        console.log('effect')
-    }, [models, api, props.api, props.addapi, parentId, filters, selectedFilters])
+        function prepareKeys(keys) {
+            const exceptedKeys = ['language', 'deliveryCost']
+            const newKeys = keys.filter(k => !exceptedKeys.includes(k))
+            setKeys(newKeys)
+        }
+        // console.log('effect')
+        // console.log(models)
+    }, [props.list, models, api, props.api, props.addapi, parentId, filters, selectedFilters])
     // #region functions
     const [toDelete, setToDelete] = useState(null)
 
@@ -95,7 +109,10 @@ export default function Models(props) {
             try {
                 const response = await fetch(`${config.apibase}${config.api}${props.api}/${toDelete}`, {
                     method: 'DELETE',
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem("MIT")
+                    }
                 })
                 if (response.ok) {
                     const result = await response.json()
@@ -154,9 +171,11 @@ export default function Models(props) {
             for (let i = 0; i < selectedFilters[filterKey].length; i++)
                 query += `${apis[0]}=${selectedFilters[filterKey][i]}&`
             const result = await getData(query)
-            console.log(query)
             if (result.ok) {
-                filters[key] = result.data
+                if (result.data.filters === undefined)
+                    filters[key] = result.data
+                else
+                    filters[key] = result.data.models
             }
             else
                 setError(config.text.wrong)
@@ -196,12 +215,12 @@ export default function Models(props) {
     }
     //#endregion
 
-    const pageHeader = props.selectable ? <InputLabel>Список</InputLabel> : <PageHeader models={props.models} name={name} path={`/${props.api}/scr/0${props.addapi === undefined ? '' : `/${parentId}/${name}`}`} />
+    const pageHeader = props.list !== undefined ? null : props.selectable ? <InputLabel>Список</InputLabel> : <PageHeader models={props.models} name={name} path={props.api === 'invoice' || props.api === 'entry' ? undefined : `/${props.api}/scr/0${props.addapi === undefined ? '' : `/${parentId}/${name}`}`} />
 
     return (models === null ?
         <Progress /> :
         <Box>
-            {drawer ?
+            {props.list !== undefined ? null : drawer ?
                 <Grid container>
                     <Grid item xs={11}>
                         {pageHeader}
@@ -219,12 +238,11 @@ export default function Models(props) {
                 <Typography>{config.text.noObject}</Typography> :
                 props.api === 'category' ?
                     <Table size='small'>
-                        <TableHeader data={keys.slice(-2)} />
+                        <TableHeader data={keys.slice(-2).map(k => config.text[k])} action={true} />
                         <TableBody>
                             {models.map(a => {
-                                const padding = a.padding
                                 return (<TableRow key={a.id}>
-                                    <TableCell sx={{ paddingLeft: padding }}>{a.name}</TableCell>
+                                    <TableCell sx={{ paddingLeft: a.padding, fontSize: 10 / (a.padding / 18 + 0.6) }}>{a.name}</TableCell>
                                     <TableCell >{a.products}</TableCell>
                                     <TableCell>
                                         <EditCell api={props.api} id={a.id} delete={() => prepareDelete(a.id)} pro={props.pro} />
@@ -234,17 +252,19 @@ export default function Models(props) {
                         </TableBody>
                     </Table> :
                     <Table size='small'>
-                        <TableHeader data={keys} human={props.api === 'employee' ? true : false} />
+                        <TableHeader data={keys.map(k => config.text[k])} action={props.api === 'entry' || props.api === undefined ? false : true} />
                         <TableBody>
-                            {models.map(a => (
-                                <TableRow key={a.id}>
-                                    {keys.map((k, i) => (<TableCell key={i}>{typeof (a[k]) === 'boolean' ? a[k] ? <Check color='success' /> : <Close color='error' /> : k === 'date' ? new Date(a[k]).toLocaleString() : a[k]}</TableCell>))}
-                                    <TableCell>
-                                        {props.selectable ?
-                                            <Checkbox checked={props.selectedIds.includes(a.id)} onChange={e => props.handleCheck(a.id, e)} value={a.name} /> :
-                                            <EditCell api={props.api} id={a.id} api2={props.api2} parId={parentId} parName={name} name={a.name} delete={() => prepareDelete(a.id)} pro={props.pro} />
-                                        }
-                                    </TableCell>
+                            {models.map(m => (
+                                <TableRow key={m.id}>
+                                    {keys.map((k, i) => (<TableCell key={i}>{typeof (m[k]) === 'boolean' ? m[k] ? <Check color='success' /> : <Close color='error' /> : k.toLowerCase().includes('date') ? new Date(m[k]).toLocaleString() : m[k]}</TableCell>))}
+                                    {props.api === 'entry' || props.api === undefined ? null :
+                                        <TableCell>
+                                            {props.selectable ?
+                                                <Checkbox checked={props.selectedIds.includes(m.id)} onChange={e => props.handleCheck(m, e)} value={m.name} /> :
+                                                <EditCell api={props.api} id={m.id} api2={props.api2} api3={props.api3} parId={parentId} parName={name} name={m.name} delete={() => prepareDelete(m.id)} pro={props.pro} />
+                                            }
+                                        </TableCell>
+                                    }
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -260,7 +280,9 @@ export default function Models(props) {
                 </Box>
             </Box>
                 : null}
-            <RemoveModal ref={modalRef} delete={isDelete => deleteModel(isDelete)} />
+            {props.api === 'entry' ? null :
+                <RemoveModal ref={modalRef} delete={isDelete => deleteModel(isDelete)} />
+            }
             {drawer ? <SwipeableDrawer anchor='right' open={drawerOpen} onOpen={() => setDrawerOpen(true)} onClose={() => setDrawerOpen(false)}>
                 <Box sx={{ width: 370 }} mt={8} px={2}>
                     {filters !== null ? Object.keys(filters).sort((a, b) => {

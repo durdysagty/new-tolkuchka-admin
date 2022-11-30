@@ -1,8 +1,8 @@
 import config from '../configs/config.json'
 
-export async function getData(api) {
+export async function getData(api, lang = null) {
     try {
-        const response = await fetch(`${config.apibase}${config.api}${api}`, {
+        const response = await fetch(`${lang === null || lang === 'ru' ? config.apibase : config[`${lang}.apibase`]}${config.api}${api}`, {
             method: 'GET',
             credentials: 'include',
             headers: {

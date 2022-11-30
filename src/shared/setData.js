@@ -5,17 +5,19 @@ import config from '../configs/config.json'
 export async function setFormData(api, id, data, images = null, optional = null) {
     console.log('setFormData')
     try {
-        for (let key in data)
-            if (data[key] === null)
-                data[key] = ''
         const formData = new FormData()
-        for (let key in data) {
-            formData.append(key, data[key])
+        if (data !== null) {
+            for (let key in data)
+                if (data[key] === null)
+                    data[key] = ''
+            for (let key in data) {
+                formData.append(key, data[key])
+            }
         }
         if (optional !== null) {
             for (let key in optional)
                 if (optional[key] !== null)
-                    if (typeof optional[key] === 'string')
+                    if (typeof optional[key] === 'string' || typeof optional[key] === 'boolean')
                         formData.append(key, optional[key])
                     else
                         for (let o of optional[key]) {
@@ -38,6 +40,9 @@ export async function setFormData(api, id, data, images = null, optional = null)
         const response = await fetch(`${config.apibase}${config.api}${api}`, {
             method: id === '0' ? 'POST' : 'PUT',
             credentials: 'include',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("MIT")
+            },
             body: formData
         })
         if (response.ok) {
@@ -70,6 +75,7 @@ export async function setJsonData(api, id, data) {
             method: id === '0' ? 'POST' : 'PUT',
             credentials: 'include',
             headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("MIT"),
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
