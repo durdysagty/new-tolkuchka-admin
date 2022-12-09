@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react'
 import config from '../configs/config.json'
 import PageHeader from '../shared/PageHeader'
 import { Box, FormHelperText, Grid, Table, TableBody, TableCell, TableRow, TextField, Typography } from '@mui/material'
-import SubmitButton from '../shared/SubmitButton'
 import { getData } from '../shared/getData'
 import Progress from '../shared/Progress'
 import Models from '../shared/Models'
+import { Autorenew } from '@mui/icons-material'
 
 const date = new Date()
 const startDate = `${date.getFullYear()}-${date.getMonth() + 1}-01`
-const endDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+const endDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`
 
 export default function Report(props) {
 
@@ -28,17 +28,19 @@ export default function Report(props) {
             const result = await getData(`${props.api}?start=${start}&end=${end}`)
             if (result.ok) {
                 setReportOrders(result.data)
-                const val = result.data.reduce((acc, curVal) => {
-                    acc.profit = acc.profit + curVal.netProfit
-                    acc.income = acc.income + curVal.soldPrice
-                    return acc
-                }, {
-                    profit: 0,
-                    income: 0
-                })
-                setProfit(val.profit.toFixed(2))
-                setIncome(val.income.toFixed(2))
-                setProfitability((val.profit / val.income * 100).toFixed(2))
+                if (result.data.length > 0) {
+                    const val = result.data.reduce((acc, curVal) => {
+                        acc.profit = acc.profit + curVal.netProfit
+                        acc.income = acc.income + curVal.soldPrice
+                        return acc
+                    }, {
+                        profit: 0,
+                        income: 0
+                    })
+                    setProfit(val.profit.toFixed(2))
+                    setIncome(val.income.toFixed(2))
+                    setProfitability((val.profit / val.income * 100).toFixed(2))
+                }
             }
             else
                 setSubmitError(config.text.wrong)
@@ -48,8 +50,7 @@ export default function Report(props) {
     }, [once, props.api, reportOrders, start, end])
 
     const [submitError, setSubmitError] = useState('')
-    function submit(e) {
-        e.preventDefault()
+    function submit() {
         setReportOrders(null)
     }
 
@@ -69,9 +70,7 @@ export default function Report(props) {
                     <TextField type='date' sx={{ margin: 0 }} value={end} onChange={e => setEnd(e.target.value)} />
                 </Grid>
                 <Grid item xs={6} md={3} display='flex'>
-                    <Box component='form' onSubmit={submit} mx={0} display='flex' >
-                        <SubmitButton marginTop={0} />
-                    </Box>
+                    <Autorenew onClick={submit} sx={{ cursor: 'pointer' }} />
                 </Grid>
             </Grid>
             <FormHelperText error>{submitError}</FormHelperText>

@@ -9,7 +9,7 @@ import { RemoveModal } from './RemoveModal'
 import Progress from './Progress'
 import { useParams } from 'react-router-dom'
 import { r } from './Result'
-import { Check, Close, FilterAlt, KeyboardArrowLeft, KeyboardArrowRight, KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight } from '@mui/icons-material'
+import { CheckBox, Close, FilterAlt, KeyboardArrowLeft, KeyboardArrowRight, KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight } from '@mui/icons-material'
 
 export default function Models(props) {
 
@@ -104,6 +104,13 @@ export default function Models(props) {
         modalRef.current.handleOpen()
     }
 
+    function setErrorReason(text) {
+        setError(text)
+        setTimeout(() => {
+            setError(null)
+        }, 5000)
+    }
+
     async function deleteModel(isDelete) {
         if (isDelete)
             try {
@@ -118,12 +125,8 @@ export default function Models(props) {
                     const result = await response.json()
                     if (result === r.success)
                         models.splice(models.indexOf(models.find(a => (a.id === toDelete))), 1)
-                    else {
-                        setError(config.text.notDeleted)
-                        setTimeout(() => {
-                            setError(null)
-                        }, 5000)
-                    }
+                    else
+                        setErrorReason(config.text.notDeleted)
                     setToDelete(null)
                 }
                 else {
@@ -213,6 +216,23 @@ export default function Models(props) {
             getModelsShort(p)
         }
     }
+
+    async function changeBoolenProperty(id, key) {
+        const query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${parentId === undefined ? '' : `/${parentId}`}/${id}/${key}`
+        const result = await getData(query)
+        if (result.ok) {
+            if (result.data === r.success) {
+                const array = models.slice()
+                const model = array.find(m => (m.id === id))
+                model[key] = !model[key]
+                setModels(array)
+            }
+            else
+                setErrorReason(config.text.notModified)
+        }
+        else
+            setError(config.text.wrong)
+    }
     //#endregion
 
     const pageHeader = props.list !== undefined ? null : props.selectable ? <InputLabel>Список</InputLabel> : <PageHeader models={props.models} name={name} path={props.api === 'invoice' || props.api === 'entry' ? undefined : `/${props.api}/scr/0${props.addapi === undefined ? '' : `/${parentId}/${name}`}`} />
@@ -252,11 +272,11 @@ export default function Models(props) {
                         </TableBody>
                     </Table> :
                     <Table size='small'>
-                        <TableHeader data={keys.map(k => config.text[k])} action={props.api === 'entry' || props.api === undefined ? false : true} />
+                        <TableHeader data={keys.map(k => k.includes('is') ? config.text[`${k}Short`] : k === 'notInUse' ? config.text['isInUseShort'] : config.text[k])} action={props.api === 'entry' || props.api === undefined ? false : true} />
                         <TableBody>
                             {models.map(m => (
                                 <TableRow key={m.id}>
-                                    {keys.map((k, i) => (<TableCell key={i}>{typeof (m[k]) === 'boolean' ? m[k] ? <Check color='success' /> : <Close color='error' /> : k.toLowerCase().includes('date') ? new Date(m[k]).toLocaleString() : m[k]}</TableCell>))}
+                                    {keys.map((k, i) => (<TableCell key={i}>{typeof (m[k]) === 'boolean' ? <Checkbox onChange={() => changeBoolenProperty(m.id, k)} checked={m[k]} checkedIcon={<CheckBox color='success' />} icon={<Close color='error' />} /> : k.toLowerCase().includes('date') ? new Date(m[k]).toLocaleString() : m[k]}</TableCell>))}
                                     {props.api === 'entry' || props.api === undefined ? null :
                                         <TableCell>
                                             {props.selectable ?
