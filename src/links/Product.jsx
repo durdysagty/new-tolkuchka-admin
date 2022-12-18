@@ -1,25 +1,26 @@
+//#region imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import config from '../configs/config.json'
 import PageHeader from '../shared/PageHeader'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Checkbox, FormHelperText, Grid, InputLabel, Table, TableBody, TableCell, TableRow, TextField, Typography } from '@mui/material'
+import { Box, Checkbox, FormHelperText, Grid, InputLabel, Table, TableBody, TableCell, TableRow, TextField } from '@mui/material'
 import { getData, getEditModel } from '../shared/getData'
 import { setFormData } from '../shared/setData'
 import Progress from '../shared/Progress'
 import AccordionList from '../shared/AccordionList'
-import { ExpandMore } from '@mui/icons-material'
+import { Close } from '@mui/icons-material'
 import ImageUpload from '../shared/ImageUpload'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
-
+//#endregion
 const x = {
     partNo: '',
-    categoryId: '',
-    typeId: '',
+    //categoryId: '',
+    //typeId: '',
     brandId: '',
     lineId: '',
     modelId: '',
-    warrantyId: '',
+    //warrantyId: '',
     price: '',
     newPrice: '',
     notInUse: false,
@@ -41,13 +42,6 @@ export default function Product(props) {
     const [images, setImages] = useState(null)
     const [validation, setValidation] = useState(x)
     const [error, setError] = useState(false)
-    const [categories, setCategories] = useState(null)
-    const [selectCats, setSelectCats] = useState(null)
-    const [selectedCat, setSelectedCat] = useState('')
-    const [selectStepCats, setSelectStepCats] = useState(null)
-    const [stepParents, setStepParents] = useState([])
-    const [toSelect, setToSelect] = useState(true)
-    const [types, setTypes] = useState(null)
     const [brands, setBrands] = useState(null)
     const [lines, setLines] = useState(null)
     const [getLines, setGetLines] = useState(false)
@@ -55,7 +49,6 @@ export default function Product(props) {
     const [getModels, setGetModels] = useState(false)
     const [specs, setSpecs] = useState(null)
     const [getSpecs, setGetSpecs] = useState(false)
-    const [warranties, setWarranties] = useState(null)
     const [getAdditional, setGetAdditional] = useState(false)
     const [once, setOnce] = useState(0)
     //#endregion
@@ -64,24 +57,9 @@ export default function Product(props) {
             setOnce(1)
         async function prepareData() {
             console.log('prepareData')
-            let result = await getData(`${props.dataFrom[0]}/tree`)
-            if (result.ok)
-                setCategories(result.data)
-            else
-                setError(config.text.wrong)
-            result = await getData(props.dataFrom[1])
-            if (result.ok)
-                setTypes(result.data)
-            else
-                setError(config.text.wrong)
-            result = await getData(props.dataFrom[2])
+            let result = await getData(props.dataFrom[2])
             if (result.ok)
                 setBrands(result.data)
-            else
-                setError(config.text.wrong)
-            result = await getData(props.dataFrom[5])
-            if (result.ok)
-                setWarranties(result.data)
             else
                 setError(config.text.wrong)
             if (id !== '0') {
@@ -92,16 +70,10 @@ export default function Product(props) {
                     if (result.data.newPrice === null)
                         result.data.newPrice = ''
                     setProduct(result.data)
-                    setToSelect(true)
                     setGetAdditional(true)
                 }
                 else
                     setSubmitError(config.text.wrong)
-                result = await getData(`${props.dataFrom[0]}/productadlinks/${id}`)
-                if (result.ok)
-                    setStepParents(result.data)
-                else
-                    setError(config.text.wrong)
                 result = await getData(`${props.api}/specvalues/${id}`)
                 if (result.ok)
                     setProductSpecsValues(result.data)
@@ -148,72 +120,24 @@ export default function Product(props) {
                     setError(config.text.wrong)
             }
         }
-        function selectCategories(categories, stepParent) {
-            console.log(`selectCategories ${stepParent}`)
-            return categories.map(c => {
-                const id = stepParent ? `catStep${c.id}` : `cat${c.id}`
-                if (!stepParent && String(product.categoryId) === String(c.id))
-                    setSelectedCat(c.name)
-                const checkBox = (stepParent && c.id === parseInt(product.categoryId)) || c.level < 2 || c.list.length > 0 ? null : <Checkbox checked={stepParent ? stepParents.includes(String(c.id)) ? true : false : String(product.categoryId) === String(c.id) ? true : false} onClick={e => e.stopPropagation()} onChange={stepParent ? e => handleCheckStep(e) : e => handleCheck(e, c)} name={keys[1]} value={c.id} />
-                if (c.list.length > 0) {
-                    const tree = selectCategories(c.list, stepParent)
-                    return <Accordion key={c.id}>
-                        <AccordionSummary expandIcon={<ExpandMore />} aria-controls={id} id={`par${id}`} sx={{ display: 'inline-flex' }}>
-                            <Typography>
-                                {checkBox}
-                                {c.name}
-                            </Typography>
-                        </AccordionSummary>
-                        <AccordionDetails id={id}>
-                            {tree}
-                        </AccordionDetails>
-                    </Accordion>
-                }
-                else {
-                    return <Typography key={c.id} sx={{ display: 'flex', alignItems: 'center' }}>
-                        {checkBox}
-                        <span>{c.name}</span>
-                    </Typography>
-                }
-            })
-        }
-        function handleCheck(e) {
-            if (e.target.checked) {
-                setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
-                setValidation(prevState => ({
-                    ...prevState,
-                    [e.target.name]: ''
-                }))
-                setToSelect(true)
-            }
-        }
-        function handleCheckStep(e) {
-            const array = stepParents.slice()
-            if (e.target.checked)
-                array.push(e.target.value)
-            else
-                array.splice(array.indexOf(e.target.value), 1)
-            setStepParents(array)
-            setToSelect(true)
-        }
-        if (categories === null && once === 1)
+        if (brands === null && once === 1)
             prepareData()
-        else if (categories !== null) {
-            if (id === '0' || product.id !== '0') {
-                if (toSelect) {
-                    const selectCats = selectCategories(categories, false)
-                    setSelectCats(selectCats)
-                    const selectStepCats = selectCategories(categories, true)
-                    setSelectStepCats(selectStepCats)
-                    setToSelect(false)
-                }
-            }
-        }
         if (product.brandId !== '' && once === 1)
             additionalData()
-    }, [once, props.api, props.dataFrom, categories, id, product, stepParents, product.categoryId, toSelect, getLines, getModels, getSpecs, getAdditional])
+    }, [once, props.api, props.dataFrom, id, product, brands, getLines, getModels, getSpecs, getAdditional])
     // #region functions
     function handleChange(e, i) {
+        if (e.target.name === undefined && id !== '0') {
+            if (images === null) {
+                const images = [null, null, null, null, null]
+                images[i] = false
+                setImages(images)
+                const imgs = document.getElementsByTagName('img')
+                imgs[i].src = `${config.apibase}images/0.jpg?w=64&h=64&fit=crop&auto=format`
+            }
+            else
+                images[i] = false
+        }
         if (e.target.name === 'image') {
             if (id !== '0') {
                 if (images === null) {
@@ -349,7 +273,6 @@ export default function Product(props) {
             product.newPrice = product.newPrice.toLocaleString()
         }
         const response = await setFormData(props.api, i, product, imagesArray, {
-            adLinks: stepParents.length > 0 ? stepParents : null,
             specsValues: productSpecsValues.length > 0 ? productSpecsValues : null,
             specsValueMods: productSpecsValueMods.length > 0 ? productSpecsValueMods.map(e =>
                 e.id
@@ -364,31 +287,17 @@ export default function Product(props) {
             setSubmitError(config.text.wrong)
     }
 
-    return ((id !== '0' && product.categoryId === '') || categories === null ?
+    return ((id !== '0' && product.brandId === '') || brands === null ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />
             <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' >
                 <FormHelperText error>{submitError}</FormHelperText>
                 <TextField type='text' label={config.text[keys[0]]} name={keys[0]} onChange={handleChange} value={product[keys[0]]} />
-                <Accordion>
-                    <AccordionSummary expandIcon={<ExpandMore />} aria-controls='cats' id='cat'>
-                        <TextField type='text' label={config.text.category} name={keys[1]} value={selectedCat} required helperText={error ? validation[keys[1]] : ''} error={error && validation[keys[1]] !== '' ? true : false} />
-                    </AccordionSummary>
-                    <AccordionDetails id='cats'>
-                        {selectCats}
-                        <Typography variant='h6' sx={{ py: 1 }}>
-                            {config.text.stepParents}
-                        </Typography>
-                        {selectStepCats}
-                    </AccordionDetails>
-                </Accordion>
-                <AccordionList list={types} name={keys[2]} handleChange={handleChange} accId='type' dtlId='types' req={true} error={error} validation={validation[keys[2]]} id={product.typeId} />
-                <AccordionList list={brands} name={keys[3]} handleChange={handleChange} accId='brand' dtlId='brands' req={true} error={error} validation={validation[keys[3]]} id={product.brandId} />
-                <AccordionList list={lines} name={keys[4]} handleChange={handleChange} accId='line' dtlId='lines' req={false} error={error} validation={validation[keys[4]]} id={product.lineId} />
-                <AccordionList list={models} name={keys[5]} handleChange={handleChange} accId='model' dtlId='models' req={true} error={error} validation={validation[keys[5]]} id={product.modelId} />
-                <AccordionList list={warranties} name={keys[6]} handleChange={handleChange} accId='warranty' dtlId='warranties' req={true} error={error} validation={validation[keys[6]]} id={product.warrantyId} />
-                {keys.slice(7, 9).map((text, i) => (
+                <AccordionList list={brands} name={keys[1]} handleChange={handleChange} accId='brand' dtlId='brands' req={true} error={error} validation={validation[keys[1]]} id={product.brandId} />
+                <AccordionList list={lines} name={keys[2]} handleChange={handleChange} accId='line' dtlId='lines' req={false} error={error} validation={validation[keys[2]]} id={product.lineId} />
+                <AccordionList list={models} name={keys[3]} handleChange={handleChange} accId='model' dtlId='models' req={true} error={error} validation={validation[keys[3]]} id={product.modelId} />
+                {keys.slice(4, 6).map((text, i) => (
                     <TextField type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} inputProps={{ step: '0.10' }} label={config.text[text]} name={text} onChange={handleChange} value={product[text]} key={i} required={i === 0 ? true : false} helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
                 ))}
                 <Box my={3}>
@@ -426,8 +335,11 @@ export default function Product(props) {
                         {[0, 1, 2, 3, 4].map((i) => {
                             const name = `${id}-${i}.jpg`
                             return (<Grid item mx={1} mb={1} key={i}>
-                                <InputLabel id='image' sx={{ cursor: 'pointer', border: 1, borderRadius: '7%', textAlign: 'center' }}>
-                                    <img src={`${config.apibase}images/product/small/${name}?w=64&h=64&fit=crop&auto=format`} srcSet={`${config.apibase}images/products/small/${name}?w=64&h=64&fit=crop&auto=format&dpr=2 2x`} alt={`${product.modelId}-${id}-${i}`} style={{ verticalAlign: 'middle' }} onLoad={e => console.log(e)} onError={e => e.target.src = `${config.apibase}images/0.jpg?w=64&h=64&fit=crop&auto=format`} />
+                                <Box textAlign='end'>
+                                    <Close onClick={e => handleChange(e, i)} sx={{ cursor: 'pointer' }} />
+                                </Box>
+                                <InputLabel sx={{ cursor: 'pointer', border: 1, borderRadius: '7%', textAlign: 'center' }}>
+                                    <img src={`${config.apibase}images/product/small/${name}?w=64&h=64&fit=crop&auto=format`} srcSet={`${config.apibase}images/products/small/${name}?w=64&h=64&fit=crop&auto=format&dpr=2 2x`} alt={`${product.modelId}-${id}-${i}`} style={{ verticalAlign: 'middle' }} onError={e => e.target.src = `${config.apibase}images/0.jpg?w=64&h=64&fit=crop&auto=format`} />
                                     <input name='image' type='file' hidden onChange={e => handleChange(e, i)} accept='image/gif image/png, image/jpeg, image/x-png' />
                                 </InputLabel>
                             </Grid>)

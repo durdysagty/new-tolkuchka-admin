@@ -115,7 +115,9 @@ export default function PurchaseInvoice(props) {
             const array = purchases.slice()
             const p = array.find(p => p.productId === id)
             p.purchasePrice = parseFloat(e.target.value)
+            //p.purchasePrice = p.purchasePrice.toLocaleString()
             setPurchases(array)
+            console.log(array)
         }
     }
 

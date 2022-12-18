@@ -399,7 +399,7 @@ function App() {
     lines: [<Class />, <Models models={config.text.lines} api={apis.li} pro={true} />],
     'line/:pro/:id': [null, <Line api={apis.li} dataFrom={apis.br} />],
     models: [<AltRoute />, <Models models={config.text.models} api={apis.ml} pro={true} />],
-    'model/:pro/:id': [null, <Model api={apis.ml} dataFrom={[apis.br, apis.li, apis.sp]} />],
+    'model/:pro/:id': [null, <Model api={apis.ml} dataFrom={[apis.ct, apis.tp, apis.br, apis.li, apis.wr, apis.sp]} />],
     specs: [<Assignment />, <Models models={config.text.specs} api={apis.sp} api2={`${apis.sv}s`} pro={true} />],
     'spec/:pro/:id': [null, <Spec api={apis.sp} />],
     'specsvalues/spec/:parentId/:name': [null, <Models models={config.text.specsvalues} api={apis.sv} addapi={apis.sp} api2={`${apis.sm}s`} pro={true} />],

@@ -11,7 +11,7 @@ export default function ListMany(props) {
     useEffect(() => {
         setOnce(1)
         function selectList(list) {
-            console.log(`selectsList`)
+            // console.log(`selectsList`)
             return list.map(l => {
                 const isSelected = ids !== null ? ids.map(e => String(e[0])).includes(String(l.id)) : false
                 const checkBox = <Checkbox checked={isSelected} onClick={e => e.stopPropagation()} onChange={e => handleCheck(e)} name={props.name} value={l.id} />

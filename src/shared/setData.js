@@ -19,6 +19,8 @@ export async function setFormData(api, id, data, images = null, optional = null)
                 if (optional[key] !== null)
                     if (typeof optional[key] === 'string' || typeof optional[key] === 'boolean')
                         formData.append(key, optional[key])
+                    else if (optional[key].length === undefined)
+                        formData.append(key, optional[key])
                     else
                         for (let o of optional[key]) {
                             if (Array.isArray(o)) {
@@ -35,6 +37,8 @@ export async function setFormData(api, id, data, images = null, optional = null)
             for (let i of images)
                 if (i === null)
                     formData.append('images', new File([], '0'))
+                else if (i === false)
+                    formData.append('images', new File([], 'delete'))
                 else
                     formData.append('images', i)
         const response = await fetch(`${config.apibase}${config.api}${api}`, {

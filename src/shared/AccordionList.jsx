@@ -12,12 +12,13 @@ export default function AccordionList(props) {
     const [checkList, setCheckList] = useState(null)
     const [toSelect, setToSelect] = useState(true)
     const [list, setList] = useState(props.list)
+    const [search, setSearch] = useState('')
 
     useEffect(() => {
         if (list === null)
             setSelected('')
         function selectList(list) {
-            console.log(`selectList`)
+            // console.log(`selectList`)
             return list.map((l, i) => {
                 const isSelected = l.id === parseInt(id)
                 if (isSelected)
@@ -64,6 +65,11 @@ export default function AccordionList(props) {
                 setSelected('')
                 setId(props.id)
             }
+            if (search !== '') {
+                const newList = props.list.filter(l => l.name.toLowerCase().includes(search.toLowerCase()))
+                const x = selectList(newList)
+                setCheckList(x)
+            }
             setToSelect(false)
         }
         if (list !== props.list) {
@@ -74,7 +80,12 @@ export default function AccordionList(props) {
             setToSelect(false)
         }
         // return setId(null)
-    }, [toSelect, props, props.id, id, selected, list])
+    }, [toSelect, props, props.id, id, selected, list, search])
+
+    function changeSearch(e) {
+        setSearch(e.target.value)
+        setToSelect(true)
+    }
 
     return <Accordion>
         <AccordionSummary sx={props.sx} expandIcon={<ExpandMore />} aria-controls={props.dtlId} id={props.accId}>
@@ -84,6 +95,7 @@ export default function AccordionList(props) {
             }
         </AccordionSummary>
         <AccordionDetails id={props.dtlId}>
+            <TextField value={search} onChange={changeSearch} />
             {checkList}
         </AccordionDetails>
     </Accordion>

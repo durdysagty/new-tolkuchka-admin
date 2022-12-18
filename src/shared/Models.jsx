@@ -1,7 +1,8 @@
+//#region imports
 import { useEffect, useRef, useState } from 'react'
 import config from '../configs/config.json'
 import { getData } from '../shared/getData'
-import { Box, Checkbox, FormHelperText, Grid, IconButton, InputLabel, SwipeableDrawer, Table, TableBody, TableCell, TableRow, Typography } from '@mui/material'
+import { Box, Button, Checkbox, FormHelperText, Grid, IconButton, InputLabel, SwipeableDrawer, Table, TableBody, TableCell, TableRow, TextField, Typography } from '@mui/material'
 import EditCell from './EditCell'
 import TableHeader from './TableHeader'
 import PageHeader from './PageHeader'
@@ -10,9 +11,11 @@ import Progress from './Progress'
 import { useParams } from 'react-router-dom'
 import { r } from './Result'
 import { CheckBox, Close, FilterAlt, KeyboardArrowLeft, KeyboardArrowRight, KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight } from '@mui/icons-material'
-
+import { setFormData } from './setData'
+//#endregion
 export default function Models(props) {
 
+    //#region states
     const { parentId } = useParams()
     const { name } = useParams()
     const [models, setModels] = useState(null)
@@ -26,8 +29,10 @@ export default function Models(props) {
     const [lastPage, setLastPage] = useState(null)
     const [page, setPage] = useState(0)
     const [pagination, setPagination] = useState(null)
+    const [change, setChange] = useState(0)
+    const [toChanges, setToChanges] = useState({})
     const modalRef = useRef()
-
+    //#endregion
     useEffect(() => {
         setApi(props.api)
         // if models are to be prepared beforhand
@@ -233,7 +238,47 @@ export default function Models(props) {
         else
             setError(config.text.wrong)
     }
+
+    function addToChanges(e) {
+        let ids = toChanges[e.target.name]
+        if (ids === undefined)
+            ids = []
+        if (e.target.checked)
+            ids.push(e.target.value)
+        else
+            ids.splice(ids.indexOf(e.target.value), 1)
+        if (ids.length === 0)
+            delete toChanges[e.target.name]
+        else
+            setToChanges(prevState => ({ ...prevState, [e.target.name]: ids }))
+        console.log(toChanges)
+    }
     //#endregion
+    async function submitPrice(e) {
+        e.preventDefault()
+        const price = parseFloat(change)
+        const response = await setFormData(`${props.api}/changeprice`, '0', null, null, {
+            price: price,
+            priceIds: toChanges.price !== undefined ? toChanges.price : null,
+            newPriceIds: toChanges.newPrice !== undefined ? toChanges.newPrice : null
+        })
+        if (response.ok)
+            if (response.result === r.success) {
+                for (const key in toChanges) {
+                    for (const id of toChanges[key]) {
+                        const model = models.find(e => e.id === parseInt(id))
+                        if (key === 'newPrice' && change === 0)
+                            model[key] = ''
+                        else
+                            model[key] = change
+                    }
+                }
+                setToChanges({})
+                setChange(0)
+            }
+            else
+                setError(config.text.wrong)
+    }
 
     const pageHeader = props.list !== undefined ? null : props.selectable ? <InputLabel>Список</InputLabel> : <PageHeader models={props.models} name={name} path={props.api === 'invoice' || props.api === 'entry' ? undefined : `/${props.api}/scr/0${props.addapi === undefined ? '' : `/${parentId}/${name}`}`} />
 
@@ -241,11 +286,21 @@ export default function Models(props) {
         <Progress /> :
         <Box>
             {props.list !== undefined ? null : drawer ?
-                <Grid container>
-                    <Grid item xs={11}>
+                <Grid container justifyContent='space-between' >
+                    <Grid item xs='auto'>
                         {pageHeader}
                     </Grid>
-                    <Grid item xs={1}>
+                    {keys.some(k => k === 'price' || k === 'Price') ?
+                        <Grid item xs='auto'>
+                            <Box component='form' onSubmit={submitPrice} margin='auto' sx={{ display: 'inline-flex' }} >
+                                <TextField type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} inputProps={{ step: '0.10' }} onChange={e => setChange(e.target.value)} value={change} />
+                                <Box ml={1}>
+                                    <Button type='submit' variant='contained' size='small'>Изменить</Button>
+                                </Box>
+                            </Box>
+                        </Grid> :
+                        null}
+                    <Grid item xs='auto'>
                         <IconButton onClick={() => setDrawerOpen(true)}>
                             <FilterAlt />
                         </IconButton>
@@ -272,11 +327,11 @@ export default function Models(props) {
                         </TableBody>
                     </Table> :
                     <Table size='small'>
-                        <TableHeader data={keys.map(k => k.includes('is') ? config.text[`${k}Short`] : k === 'notInUse' ? config.text['isInUseShort'] : config.text[k])} action={props.api === 'entry' || props.api === undefined ? false : true} />
+                        <TableHeader data={keys.map(k => k === 'isNew' || k === 'isRecommended' ? config.text[`${k}Short`] : k === 'notInUse' ? config.text['isInUseShort'] : config.text[k])} action={props.api === 'entry' || props.api === undefined ? false : true} />
                         <TableBody>
                             {models.map(m => (
                                 <TableRow key={m.id}>
-                                    {keys.map((k, i) => (<TableCell key={i}>{typeof (m[k]) === 'boolean' ? <Checkbox onChange={() => changeBoolenProperty(m.id, k)} checked={m[k]} checkedIcon={<CheckBox color='success' />} icon={<Close color='error' />} /> : k.toLowerCase().includes('date') ? new Date(m[k]).toLocaleString() : m[k]}</TableCell>))}
+                                    {keys.map((k, i) => (<TableCell key={i}>{typeof (m[k]) === 'boolean' ? <Checkbox onChange={() => changeBoolenProperty(m.id, k)} checked={m[k]} checkedIcon={<CheckBox color='success' />} icon={<Close color='error' />} disabled={k === 'isPaid' || k === 'isDelivered'} /> : k.toLowerCase().includes('date') ? new Date(m[k]).toLocaleString() : k.includes('rice') && !k.includes('Rate') ? <Box><Checkbox checked={toChanges[k] !== undefined && toChanges[k].includes(String(m.id))} value={m.id} name={k} onChange={addToChanges} />{m[k]} </Box> : m[k]}</TableCell>))}
                                     {props.api === 'entry' || props.api === undefined ? null :
                                         <TableCell>
                                             {props.selectable ?
@@ -325,7 +380,7 @@ export default function Models(props) {
                             <Box p={1}>
                                 {filters[f].map(d => (<Box sx={{ paddingLeft: d.padding }} key={d.id}>
                                     <Checkbox checked={selectedFilters[key].includes(`${d.id}`)} onChange={e => querySet(e, key, dependent)} value={d.id} />
-                                    {d.name}
+                                    {d.name === undefined ? d.humanName : d.name}
                                 </Box>))}
                             </Box>
                         </Box>
