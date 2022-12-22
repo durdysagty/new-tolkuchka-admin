@@ -31,7 +31,7 @@ export default function Content(props) {
         setOnce(1)
         async function prepareData() {
             console.log('prepareData')
-            const result = await getEditModel(props.api)
+            const result = await getEditModel(`${props.api}/edit`)
             if (result.ok)
                 setContent(result.data)
             else

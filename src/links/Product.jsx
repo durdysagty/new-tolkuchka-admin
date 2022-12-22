@@ -8,7 +8,7 @@ import { getData, getEditModel } from '../shared/getData'
 import { setFormData } from '../shared/setData'
 import Progress from '../shared/Progress'
 import AccordionList from '../shared/AccordionList'
-import { Close } from '@mui/icons-material'
+import { Autorenew, Close } from '@mui/icons-material'
 import ImageUpload from '../shared/ImageUpload'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
@@ -151,7 +151,7 @@ export default function Product(props) {
             else
                 setImages(e.target.files)
         }
-        else if (e.target.name === keys[9] || e.target.name === keys[10] || e.target.name === keys[11] || e.target.name === keys[12])
+        else if (e.target.name === keys[6] || e.target.name === keys[7] || e.target.name === keys[8] || e.target.name === keys[9])
             setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.checked }))
         else
             setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -310,24 +310,29 @@ export default function Product(props) {
                         </Grid>
                     ))}
                 </Box>
-                <InputLabel>{config.text.specs}</InputLabel>
+                <Box display='flex'>
+                    <InputLabel>{config.text.specs}</InputLabel>
+                    <Autorenew onClick={() => setGetSpecs(true)} sx={{ cursor: 'pointer' }} />
+                </Box>
                 {specs === null ? null :
-                    <Table size='small'>
-                        <TableBody>
-                            {specs.map((s, i) => (
-                                <TableRow key={i}>
-                                    <TableCell>
-                                        {s.name}
-                                    </TableCell>
-                                    <TableCell>
-                                        <AccordionList level={1} name='productSpecsValues' name2='productSpecsValueMods' tableCell={true} list={s.list} checklist={productSpecsValueMods} handleChange={handleSpecs} accId={`${i}x`} dtlId={`${i}s`} id={id !== '0' ? s.list.map(x => x.id).find((e) => {
-                                            return productSpecsValues.includes(String(e))
-                                        }) : undefined} />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                    <Box mb={2}>
+                        <Table size='small'>
+                            <TableBody>
+                                {specs.map((s, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell>
+                                            {s.name}
+                                        </TableCell>
+                                        <TableCell>
+                                            <AccordionList level={1} name='productSpecsValues' name2='productSpecsValueMods' tableCell={true} list={s.list} checklist={productSpecsValueMods} handleChange={handleSpecs} accId={`${i}x`} dtlId={`${i}s`} id={id !== '0' ? s.list.map(x => x.id).find((e) => {
+                                                return productSpecsValues.includes(String(e))
+                                            }) : undefined} />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </Box>
                 }
                 {id === '0' ?
                     <ImageUpload handleChange={handleChange} multiple={true} id={id} error={error} validation={validation} image='product' /> :

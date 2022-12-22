@@ -39,7 +39,7 @@ export default function PurchaseInvoice(props) {
             console.log('prepareData')
             let result = await getData(props.dataFrom[0])
             if (result.ok)
-                setCurrencies(result.data.map(c => ({
+                setCurrencies(result.data.models.map(c => ({
                     id: c.id,
                     name: c.codeName,
                     realRate: c.realRate.toLocaleString()
@@ -48,7 +48,7 @@ export default function PurchaseInvoice(props) {
                 setError(config.text.wrong)
             result = await getData(props.dataFrom[1])
             if (result.ok)
-                setSuppliers(result.data)
+                setSuppliers(result.data.models)
             else
                 setError(config.text.wrong)
             if (id !== '0') {
@@ -179,7 +179,7 @@ export default function PurchaseInvoice(props) {
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />
-            <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' >
+            <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' mb={1} >
                 <FormHelperText error>{submitError}</FormHelperText>
                 <AccordionList list={currencies} name={keys[0]} handleChange={handleChange} accId='currency' dtlId='currencies' req={true} error={error} validation={validation[keys[0]]} id={id !== '0' ? purchaseInvoice.currencyId : undefined} />
                 <AccordionList list={suppliers} name={keys[1]} handleChange={handleChange} accId='supplier' dtlId='suppliers' req={true} error={error} validation={validation[keys[1]]} id={id !== '0' ? purchaseInvoice.supplierId : undefined} />

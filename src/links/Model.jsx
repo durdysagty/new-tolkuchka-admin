@@ -49,6 +49,7 @@ export default function Model(props) {
     const [warranties, setWarranties] = useState(null)
     const [getAdditional, setGetAdditional] = useState(false)
     const [once, setOnce] = useState(0)
+    const [search, setSearch] = useState('')
     //#endregion
     useEffect(() => {
         if (once !== 1)
@@ -99,6 +100,9 @@ export default function Model(props) {
                 else
                     setError(config.text.wrong)
             }
+            else
+                if (stepParents === null)
+                    setStepParents([])
         }
         async function additionalData() {
             if (getAdditional)
@@ -114,34 +118,46 @@ export default function Model(props) {
             }
         }
         function selectCategories(categories, stepParent) {
-            //console.log(`selectCategories ${stepParent}`)
             return categories.map(c => {
-                const id = stepParent ? `catStep${c.id}` : `cat${c.id}`
-                if (!stepParent && String(model.categoryId) === String(c.id))
-                    setSelectedCat(c.name)
-                const checkBox = (stepParent && c.id === parseInt(model.categoryId)) || c.level < 2 || c.list.length > 0 ? null : <Checkbox checked={stepParent ? stepParents.includes(String(c.id)) ? true : false : String(model.categoryId) === String(c.id) ? true : false} onClick={e => e.stopPropagation()} onChange={stepParent ? e => handleCheckStep(e) : e => handleCheck(e, c)} name={keys[1]} value={c.id} />
-                if (c.list.length > 0) {
-                    const tree = selectCategories(c.list, stepParent)
-                    return <Accordion key={c.id}>
-                        <AccordionSummary expandIcon={<ExpandMore />} aria-controls={id} id={`par${id}`} sx={{ display: 'inline-flex' }}>
-                            <Typography>
-                                {checkBox}
-                                {c.name}
-                            </Typography>
-                        </AccordionSummary>
-                        <AccordionDetails id={id}>
-                            {tree}
-                        </AccordionDetails>
-                    </Accordion>
+                if (c !== null) {
+                    const id = stepParent ? `catStep${c.id}` : `cat${c.id}`
+                    if (!stepParent && String(model.categoryId) === String(c.id))
+                        setSelectedCat(c.name)
+                    const checkBox = (stepParent && c.id === parseInt(model.categoryId)) || c.level < 2 || c.list.length > 0 ? null : <Checkbox checked={stepParent ? stepParents.includes(String(c.id)) ? true : false : String(model.categoryId) === String(c.id) ? true : false} onClick={e => e.stopPropagation()} onChange={stepParent ? e => handleCheckStep(e) : e => handleCheck(e, c)} name={keys[1]} value={c.id} />
+                    if (c.list.length > 0) {
+                        const tree = selectCategories(c.list, stepParent)
+                        return <Accordion key={c.id}>
+                            <AccordionSummary expandIcon={<ExpandMore />} aria-controls={id} id={`par${id}`} sx={{ display: 'inline-flex' }}>
+                                <Typography>
+                                    {checkBox}
+                                    {c.name}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails id={id}>
+                                {tree}
+                            </AccordionDetails>
+                        </Accordion>
+                    }
+                    else {
+                        return <Typography key={c.id} sx={{ display: 'flex', alignItems: 'center' }}>
+                            {checkBox}
+                            <span>{c.name}</span>
+                        </Typography>
+                    }
                 }
-                else {
-                    return <Typography key={c.id} sx={{ display: 'flex', alignItems: 'center' }}>
-                        {checkBox}
-                        <span>{c.name}</span>
-                    </Typography>
-                }
+                else
+                    return null
             })
         }
+        // let searchTimeOut = null
+        // function changeSearch(e) {
+        //setSearch(e.target.value)
+        // if (searchTimeOut !== null)
+        //     clearTimeout(searchTimeOut)
+        // searchTimeOut = setTimeout(() => {
+        //     setToSelect(true)
+        // }, 1000)
+        // }
         function handleCheck(e) {
             if (e.target.checked) {
                 setModel(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -161,22 +177,38 @@ export default function Model(props) {
             setStepParents(array)
             setToSelect(true)
         }
+        // let searchedCategories = []
+        function searchCategories(categories, searchedCategories) {
+            console.log('searchCategories')
+            categories.forEach(c => {
+                if (c.name.toLowerCase().includes(search.toLowerCase()))
+                    searchedCategories.push(c)
+                else if (c.list.length > 0)
+                    searchCategories(c.list, searchedCategories)
+            })
+            return searchedCategories
+        }
         if (categories === null && once === 1)
             prepareData()
-        // if (brands === null && once === 1)
-        //     prepareData()
-        else if (categories !== null && stepParents !== null && model.id !== undefined && toSelect) {
-            if (id === '0' || model.id !== '0') {
-                setToSelect(false)
-                const selectCats = selectCategories(categories, false)
-                setSelectCats(selectCats)
-                const selectStepCats = selectCategories(categories, true)
-                setSelectStepCats(selectStepCats)
+        else if (((id !== '0' && model.id !== '0' && model.id !== undefined && toSelect) || (id === '0' && toSelect)) && (categories !== null && stepParents !== null)) {
+            setToSelect(false)
+            let list = null
+            if (search === '')
+                list = categories
+            else {
+                let searchedCategories = []
+                searchCategories(categories, searchedCategories)
+                list = searchedCategories
             }
+            console.log(list)
+            const sc1 = selectCategories(list, false)
+            const sc2 = selectCategories(list, true)
+            setSelectCats(sc1)
+            setSelectStepCats(sc2)
         }
         if (model.brandId !== '' && once === 1)
             additionalData()
-    }, [once, props.api, props.dataFrom, brands, categories, id, model, model.brandId, stepParents, model.categoryId, toSelect, selectedSpecs, getAdditional, getLines])
+    }, [once, props.api, props.dataFrom, brands, categories, id, model, model.brandId, stepParents, model.categoryId, toSelect, selectedSpecs, getAdditional, getLines, search])
     //#region function
     function handleCheck(array) {
         setSelectedSpecs(array)
@@ -208,6 +240,16 @@ export default function Model(props) {
         setError(true)
     }
 
+    let searchTimeOut = null
+    function changeSearch(e) {
+        setSearch(e.target.value)
+        // setToSelect(true)
+        if (searchTimeOut !== null)
+            clearTimeout(searchTimeOut)
+        searchTimeOut = setTimeout(() => {
+            setToSelect(true)
+        }, 2000)
+    }
     const [submitError, setSubmitError] = useState('')
 
     const { pro } = useParams()
@@ -244,6 +286,7 @@ export default function Model(props) {
                         <TextField type='text' label={config.text.category} name={keys[1]} value={selectedCat} required helperText={error ? validation[keys[1]] : ''} error={error && validation[keys[1]] !== '' ? true : false} />
                     </AccordionSummary>
                     <AccordionDetails id='cats'>
+                        <TextField value={search} onChange={changeSearch} />
                         {selectCats}
                         <Typography variant='h6' sx={{ py: 1 }}>
                             {config.text.stepParents}

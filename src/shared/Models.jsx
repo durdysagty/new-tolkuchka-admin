@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import config from '../configs/config.json'
 import { getData } from '../shared/getData'
-import { Box, Button, Checkbox, FormHelperText, Grid, IconButton, InputLabel, SwipeableDrawer, Table, TableBody, TableCell, TableRow, TextField, Typography } from '@mui/material'
+import { Box, Button, Checkbox, FormHelperText, Grid, InputLabel, Table, TableBody, TableCell, TableRow, TextField, Typography } from '@mui/material'
 import EditCell from './EditCell'
 import TableHeader from './TableHeader'
 import PageHeader from './PageHeader'
@@ -10,7 +10,7 @@ import { RemoveModal } from './RemoveModal'
 import Progress from './Progress'
 import { useParams } from 'react-router-dom'
 import { r } from './Result'
-import { CheckBox, Close, FilterAlt, KeyboardArrowLeft, KeyboardArrowRight, KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight } from '@mui/icons-material'
+import { CheckBox, Close, KeyboardArrowLeft, KeyboardArrowRight, KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight } from '@mui/icons-material'
 import { setFormData } from './setData'
 //#endregion
 export default function Models(props) {
@@ -22,10 +22,7 @@ export default function Models(props) {
     const [keys, setKeys] = useState(null)
     const [api, setApi] = useState('')
     const [error, setError] = useState(null)
-    const [drawer, setDrawer] = useState(false)
-    const [drawerOpen, setDrawerOpen] = useState(false)
-    const [filters, setFilters] = useState(null)
-    const [selectedFilters, setSelectedFilters] = useState({})
+    const [getShortModels, setGetShortModels] = useState(false)
     const [lastPage, setLastPage] = useState(null)
     const [page, setPage] = useState(0)
     const [pagination, setPagination] = useState(null)
@@ -42,42 +39,11 @@ export default function Models(props) {
                 console.log('getModels')
                 const result = await getData(query)
                 if (result.ok) {
-                    if (result.data.filters === undefined) {
-                        setModels(result.data)
-                        if (result.data.length > 0)
-                            prepareKeys(Object.keys(result.data[0]))
-                        setDrawer(false)
-                        setFilters(null)
-                        setSelectedFilters({})
-                        setPage(0)
-                        setLastPage(null)
-                        setPagination(null)
-                    }
-                    else {
-                        setModels(result.data.models)
-                        if (result.data.models.length > 0)
-                            prepareKeys(Object.keys(result.data.models[0]))
-                        const fs = {}
-                        result.data.filters.forEach(async (f) => {
-                            if (!f.includes(" ")) {
-                                const result = await getData(`${f}`)
-                                if (result.ok) {
-                                    fs[f] = result.data
-                                    selectedFilters[f] = []
-                                }
-                                else
-                                    setError(config.text.wrong)
-                            }
-                            else {
-                                fs[f] = []
-                                selectedFilters[f.split(" ")[1]] = []
-                            }
-                        })
-                        setLastPage(result.data.lastPage)
-                        setPagination(result.data.pagination)
-                        setFilters(fs)
-                        setDrawer(true)
-                    }
+                    setLastPage(result.data.lastPage)
+                    setPagination(result.data.pagination)
+                    setModels(result.data.models)
+                    if (result.data.models.length > 0)
+                        prepareKeys(Object.keys(result.data.models[0]))
                 }
                 else
                     setError(config.text.wrong)
@@ -87,6 +53,8 @@ export default function Models(props) {
             else if (models !== null && api !== props.api) {
                 getModels()
             }
+            if (getShortModels)
+                getModelsShort()
         }
         else {
             if (props.list.length > 0)
@@ -98,9 +66,26 @@ export default function Models(props) {
             const newKeys = keys.filter(k => !exceptedKeys.includes(k))
             setKeys(newKeys)
         }
+        async function getModelsShort() {
+            console.log('getModelsShort')
+            setGetShortModels(false)
+            let query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${parentId === undefined ? '' : `/${parentId}`}?`
+            query += `page=${page}`
+            const result = await getData(query)
+            if (result.ok) {
+                if (result.data.models === undefined)
+                    setModels(result.data)
+                else {
+                    setModels(result.data.models)
+                    setLastPage(result.data.lastPage)
+                    setPagination(result.data.pagination)
+                }
+            }
+            else
+                setError(config.text.wrong)
+        }
         // console.log('effect')
-        // console.log(models)
-    }, [props.list, models, api, props.api, props.addapi, parentId, filters, selectedFilters])
+    }, [props.list, models, api, props.api, props.addapi, parentId, getShortModels, page])
     // #region functions
     const [toDelete, setToDelete] = useState(null)
 
@@ -146,80 +131,10 @@ export default function Models(props) {
         modalRef.current.handleClose()
     }
 
-    async function getModelsShort(page) {
-        console.log('getModelsShort')
-        setPage(page)
-        let query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${parentId === undefined ? '' : `/${parentId}`}?`
-        for (let key in selectedFilters) {
-            for (let i = 0; i < selectedFilters[key].length; i++)
-                query += `${key}=${selectedFilters[key][i]}&`
-        }
-        query += `page=${page}`
-        const result = await getData(query)
-        if (result.ok) {
-            if (result.data.filters === undefined)
-                setModels(result.data)
-            else {
-                setModels(result.data.models)
-                setLastPage(result.data.lastPage)
-                setPagination(result.data.pagination)
-            }
-        }
-        else
-            setError(config.text.wrong)
-    }
-    // get filters that depends on parent
-    async function getDependentFilterData(key) {
-        console.log('getFilterShort')
-        const apis = key.split(" ")
-        // get key of dependence selectedFilter
-        const filterKey = apis[0].replace('Id', '')
-        if (selectedFilters[filterKey].length > 0) {
-            let query = `${apis[1]}?`
-            for (let i = 0; i < selectedFilters[filterKey].length; i++)
-                query += `${apis[0]}=${selectedFilters[filterKey][i]}&`
-            const result = await getData(query)
-            if (result.ok) {
-                if (result.data.filters === undefined)
-                    filters[key] = result.data
-                else
-                    filters[key] = result.data.models
-            }
-            else
-                setError(config.text.wrong)
-        }
-        else
-            filters[key] = []
-    }
-
-    function querySet(e, key, dependent) {
-        if (dependent) {
-            if (e.target.checked)
-                selectedFilters[key][0] = e.target.value
-            else {
-                selectedFilters[key].splice(selectedFilters[key].indexOf(e.target.value), 1)
-            }
-        }
-        else {
-            if (e.target.checked)
-                selectedFilters[key].push(e.target.value)
-            else {
-                selectedFilters[key].splice(selectedFilters[key].indexOf(e.target.value), 1)
-            }
-        }
-        getModelsShort(0)
-        const keys = Object.keys(filters)
-        const dependentFilterKey = keys.find(k => {
-            return k.includes(`${key}Id`)
-        })
-        if (dependentFilterKey !== undefined)
-            getDependentFilterData(dependentFilterKey)
-    }
-
     function queryPage(p) {
-        if (p !== page) {
-            getModelsShort(p)
-        }
+        if (p !== page)
+            setPage(p)
+        setGetShortModels(true)
     }
 
     async function changeBoolenProperty(id, key) {
@@ -285,7 +200,7 @@ export default function Models(props) {
     return (models === null ?
         <Progress /> :
         <Box>
-            {props.list !== undefined ? null : drawer ?
+            {props.list !== undefined ? null :
                 <Grid container justifyContent='space-between' >
                     <Grid item xs='auto'>
                         {pageHeader}
@@ -300,13 +215,7 @@ export default function Models(props) {
                             </Box>
                         </Grid> :
                         null}
-                    <Grid item xs='auto'>
-                        <IconButton onClick={() => setDrawerOpen(true)}>
-                            <FilterAlt />
-                        </IconButton>
-                    </Grid>
-                </Grid> :
-                pageHeader
+                </Grid>
             }
             <FormHelperText error>{error}</FormHelperText>
             {models.length === 0 ?
@@ -318,7 +227,7 @@ export default function Models(props) {
                             {models.map(a => {
                                 return (<TableRow key={a.id}>
                                     <TableCell sx={{ paddingLeft: a.padding, fontSize: 10 / (a.padding / 18 + 0.6) }}>{a.name}</TableCell>
-                                    <TableCell >{a.products}</TableCell>
+                                    <TableCell >{a.models}</TableCell>
                                     <TableCell>
                                         <EditCell api={props.api} id={a.id} delete={() => prepareDelete(a.id)} pro={props.pro} />
                                     </TableCell>
@@ -358,35 +267,6 @@ export default function Models(props) {
             {props.api === 'entry' ? null :
                 <RemoveModal ref={modalRef} delete={isDelete => deleteModel(isDelete)} />
             }
-            {drawer ? <SwipeableDrawer anchor='right' open={drawerOpen} onOpen={() => setDrawerOpen(true)} onClose={() => setDrawerOpen(false)}>
-                <Box sx={{ width: 370 }} mt={8} px={2}>
-                    {filters !== null ? Object.keys(filters).sort((a, b) => {
-                        let x = a.includes(" ") ? 1 : 0
-                        let y = b.includes(" ") ? 1 : 0
-                        if (x < y) { return -1 }
-                        else if (x > y) { return 1 }
-                        else if (x === 0 && y === 0) {
-                            x = a.toLowerCase();
-                            y = b.toLowerCase();
-                            if (x < y) { return 1; }
-                            if (x > y) { return -1; }
-                        }
-                        return 0
-                    }).map(f => {
-                        const dependent = f.includes(" ")
-                        const key = dependent ? f.split(" ")[1] : f
-                        return <Box key={f} mt={2} maxHeight={350} sx={{ overflowY: 'scroll' }}>
-                            <strong>{config.text[key]}</strong>
-                            <Box p={1}>
-                                {filters[f].map(d => (<Box sx={{ paddingLeft: d.padding }} key={d.id}>
-                                    <Checkbox checked={selectedFilters[key].includes(`${d.id}`)} onChange={e => querySet(e, key, dependent)} value={d.id} />
-                                    {d.name === undefined ? d.humanName : d.name}
-                                </Box>))}
-                            </Box>
-                        </Box>
-                    }) : null}
-                </Box>
-            </SwipeableDrawer> : null}
         </Box>
     )
 }

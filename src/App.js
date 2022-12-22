@@ -426,7 +426,7 @@ function App() {
     'employee/:pro/:id': [null, <Employee api={apis.em} dataFrom={apis.po} />],
     positions: [<EventSeat />, <Models models={config.text.positions} api={apis.po} pro={true} />],
     'position/:pro/:id': [null, <Position api={apis.po} />],
-    content: [<Source />, <Content api={apis.co} />],
+    content: [<Source />, <Content api={`${apis.co}`} />],
     report: [<Assessment />, <Report api={apis.re} />],
     entries: [<ContentPaste />, <Models models={config.text.entries} api={apis.en} />],
   }
