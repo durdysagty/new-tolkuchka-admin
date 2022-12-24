@@ -1,4 +1,5 @@
 import config from '../configs/config.json'
+import { r } from './Result'
 
 // api - the route
 // id - model id, used to determine is model to put or to post, if put - then used for modelId
@@ -51,6 +52,10 @@ export async function setFormData(api, id, data, images = null, optional = null)
         })
         if (response.ok) {
             const result = await response.json()
+            if (result !== r.success)
+                for (let key in data)
+                    if (data[key] === null)
+                        data[key] = ''
             return {
                 ok: true,
                 result: result
@@ -86,6 +91,10 @@ export async function setJsonData(api, id, data) {
         })
         if (response.ok) {
             const result = await response.json()
+            if (result !== r.success)
+                for (let key in data)
+                    if (data[key] === null)
+                        data[key] = ''
             return {
                 ok: true,
                 result: result

@@ -1,3 +1,4 @@
+//#region imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import config from '../configs/config.json'
@@ -7,7 +8,8 @@ import { getEditModel } from '../shared/getData'
 import { setJsonData } from '../shared/setData'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
-
+import Progress from '../shared/Progress'
+//#endregion
 const x = {
     nameRu: '',
     nameEn: '',
@@ -16,14 +18,14 @@ const x = {
 const keys = Object.keys(x)
 
 export default function Warranty(props) {
-
+    //#region states
     const { id } = useParams()
     const navigate = useNavigate()
     const [warranty, setWarranty] = useState(x)
     const [validation, setValidation] = useState(x)
     const [error, setError] = useState(false)
     const [once, setOnce] = useState('0')
-
+    //#endregion
     useEffect(() => {
         if (id !== '0') {
             setOnce(1)
@@ -39,7 +41,7 @@ export default function Warranty(props) {
                 prepareData()
         }
     }, [once, props.api, id, warranty.nameRu, warranty.id])
-
+    //#region functions
     function handleChange(e) {
         setWarranty(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
         setValidation(prevState => ({
@@ -60,6 +62,7 @@ export default function Warranty(props) {
     const [submitError, setSubmitError] = useState('')
 
     const { pro } = useParams()
+    //#endregion
     async function submit(e) {
         e.preventDefault()
         let i = id
@@ -78,7 +81,8 @@ export default function Warranty(props) {
     }
 
 
-    return (
+    return (id !== '0' && warranty.nameRu === '' ?
+        <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />
             <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' >

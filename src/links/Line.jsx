@@ -40,7 +40,7 @@ export default function Line(props) {
             console.log('prepareData')
             const result = await getData(props.dataFrom)
             if (result.ok)
-                setBrands(result.data)
+                setBrands(result.data.models)
             else
                 setError(config.text.wrong)
         }

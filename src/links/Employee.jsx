@@ -33,7 +33,7 @@ export default function Employee(props) {
             console.log('prepareData')
             let result = await getData(props.dataFrom)
             if (result.ok)
-                setPositions(result.data)
+                setPositions(result.data.models)
             else
                 setError(config.text.wrong)
             if (id !== '0') {

@@ -1,8 +1,14 @@
 import config from '../configs/config.json'
 
-export async function getData(api, lang = null) {
+export async function getData(api, lang = null, optional = null) {
     try {
-        const response = await fetch(`${lang === null || lang === 'ru' ? config.apibase : config[`${lang}.apibase`]}${config.api}${api}`, {
+        let query = ''
+        if (optional !== null) {
+            query = '?'
+            for (let k in optional)
+                query += `keys=${k}&values=${optional[k]}&`
+        }
+        const response = await fetch(`${lang === null || lang === 'ru' ? config.apibase : config[`${lang}.apibase`]}${config.api}${api}${query}`, {
             method: 'GET',
             credentials: 'include',
             headers: {

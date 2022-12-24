@@ -15,8 +15,8 @@ const x = {
     nameTm: '',
     order: '',
     namingOrder: '',
-    isImaged: '',
-    isFilter: ''
+    isImaged: false,
+    isFilter: false
 }
 const keys = Object.keys(x)
 
@@ -49,7 +49,7 @@ export default function Spec(props) {
     }, [once, props.api, id, spec.nameRu, spec.id])
 
     function handleChange(e) {
-        if (e.target.name === keys[5])
+        if (e.target.name === keys[5] || e.target.name === keys[6])
             setSpec(prevState => ({ ...prevState, [e.target.name]: e.target.checked }))
         else
             setSpec(prevState => ({ ...prevState, [e.target.name]: e.target.value }))

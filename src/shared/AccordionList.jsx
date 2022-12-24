@@ -1,24 +1,26 @@
+//#region imports
 import { useState } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Checkbox, TextField } from '@mui/material'
 import config from '../configs/config.json'
 import { useEffect } from 'react'
 import { ExpandMore } from '@mui/icons-material'
-
+import SearchedhList from './SearchedhList'
+//#endregion
 export default function AccordionList(props) {
-
+    //#region states
     const [selected, setSelected] = useState('')
     const [selected2, setSelected2] = useState('')
     const [id, setId] = useState(props.id === undefined ? null : props.id)
     const [checkList, setCheckList] = useState(null)
     const [toSelect, setToSelect] = useState(true)
     const [list, setList] = useState(props.list)
-    const [search, setSearch] = useState('')
-
+    const [newList, setNewList] = useState(null)
+    //#endregion
     useEffect(() => {
         if (list === null)
             setSelected('')
         function selectList(list) {
-            // console.log(`selectList`)
+            console.log(`accordionList`)
             return list.map((l, i) => {
                 const isSelected = l.id === parseInt(id)
                 if (isSelected)
@@ -65,11 +67,11 @@ export default function AccordionList(props) {
                 setSelected('')
                 setId(props.id)
             }
-            if (search !== '') {
-                const newList = props.list.filter(l => l.name.toLowerCase().includes(search.toLowerCase()))
-                const x = selectList(newList)
-                setCheckList(x)
-            }
+            // if (search !== '') {
+            //     const newList = props.list.filter(l => l.name.toLowerCase().includes(search.toLowerCase()))
+            //     const x = selectList(newList)
+            //     setCheckList(x)
+            // }
             setToSelect(false)
         }
         if (list !== props.list) {
@@ -79,13 +81,12 @@ export default function AccordionList(props) {
         else {
             setToSelect(false)
         }
+        if (newList !== null) {
+            const list = selectList(newList)
+            setCheckList(list)
+        }
         // return setId(null)
-    }, [toSelect, props, props.id, id, selected, list, search])
-
-    function changeSearch(e) {
-        setSearch(e.target.value)
-        setToSelect(true)
-    }
+    }, [toSelect, props, props.id, id, selected, list, newList])
 
     return <Accordion>
         <AccordionSummary sx={props.sx} expandIcon={<ExpandMore />} aria-controls={props.dtlId} id={props.accId}>
@@ -95,7 +96,7 @@ export default function AccordionList(props) {
             }
         </AccordionSummary>
         <AccordionDetails id={props.dtlId}>
-            <TextField value={search} onChange={changeSearch} />
+            <SearchedhList list={props.list} setNewList={setNewList} />
             {checkList}
         </AccordionDetails>
     </Accordion>

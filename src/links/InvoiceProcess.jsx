@@ -69,7 +69,6 @@ export default function InvoiceProcess(props) {
             // new Set() for get uniq productIds
             let query = Array.from(new Set(productIds)).reduce((acc, curVal) => acc + `ids=${curVal}&`, '?')
             query = usedPurchaseIds.reduce((acc, curVal) => acc + `usedIds=${curVal}&`, query)
-            console.log(query)
             const result = await getData(`${props.dataFrom[0]}/store${query}`)
             if (result.ok) {
                 // set names of products from orders, thus do not need get them from db again
@@ -186,7 +185,7 @@ export default function InvoiceProcess(props) {
                     <InputLabel>{config.text.availablePurchases}</InputLabel>
                     {store.length > 0 ?
                         <Table size='small'>
-                            <TableHeader data={Object.keys(store[0]).map(k => (config.text[k]))} action={true} />
+                            <TableHeader data={Object.keys(store[0]).map(k => (config.text[k]))} selectable={true} />
                             <TableBody>
                                 {store.map((o) => <TableRow key={o.id}>
                                     {Object.keys(store[0]).map((k, i) => <TableCell key={i}>

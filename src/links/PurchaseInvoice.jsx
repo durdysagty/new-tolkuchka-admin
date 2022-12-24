@@ -117,7 +117,6 @@ export default function PurchaseInvoice(props) {
             p.purchasePrice = parseFloat(e.target.value)
             //p.purchasePrice = p.purchasePrice.toLocaleString()
             setPurchases(array)
-            console.log(array)
         }
     }
 
@@ -144,7 +143,6 @@ export default function PurchaseInvoice(props) {
         const p = array.find(p => p.productId === id)
         p.serialNumbers[i] = e.target.value
         setPurchases(array)
-        console.log(purchases)
     }
 
     const [submitError, setSubmitError] = useState('')

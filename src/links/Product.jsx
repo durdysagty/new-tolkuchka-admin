@@ -59,7 +59,7 @@ export default function Product(props) {
             console.log('prepareData')
             let result = await getData(props.dataFrom[2])
             if (result.ok)
-                setBrands(result.data)
+                setBrands(result.data.models)
             else
                 setError(config.text.wrong)
             if (id !== '0') {
@@ -92,9 +92,9 @@ export default function Product(props) {
             if (getLines || getAdditional) {
                 setGetLines(false)
                 console.log('getLines')
-                let result = await getData(`${props.dataFrom[3]}?brandId=${product.brandId}`)
+                let result = await getData(`${props.dataFrom[3]}`, null, { [props.dataFrom[2]]: product.brandId })
                 if (result.ok)
-                    setLines(result.data)
+                    setLines(result.data.models)
                 else
                     setError(config.text.wrong)
                 setGetModels(true)
@@ -104,7 +104,7 @@ export default function Product(props) {
                 console.log('getModels')
                 if (product.lineId === null)
                     product.lineId = ''
-                let result = await getData(`${props.dataFrom[4]}?brand=${product.brandId}&line=${product.lineId}&&pp=100`)
+                let result = await getData(`${props.dataFrom[4]}`, null, { [props.dataFrom[2]]: product.brandId, [props.dataFrom[3]]: product.lineId })
                 if (result.ok)
                     setModels(result.data.models)
                 else

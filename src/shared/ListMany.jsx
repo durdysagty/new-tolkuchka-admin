@@ -2,16 +2,18 @@ import { useState } from 'react'
 import { Checkbox, Grid, InputLabel, Table, TableBody, TableCell, TableRow, Typography } from '@mui/material'
 import config from '../configs/config.json'
 import { useEffect } from 'react'
+import SearchedhList from './SearchedhList'
 
 export default function ListMany(props) {
-    const [ids, setIds] = useState(props.checkList === undefined ? null : props.checkList)
-    const [list, setList] = useState(null)
-    const [once, setOnce] = useState(0)
+    const [ids, setIds] = useState(props.checkList)
+    const [toSelect, setToSelect] = useState(true)
+    const [checkList, setCheckList] = useState(null)
+    const [list, setList] = useState(props.list)
+    const [newList, setNewList] = useState(null)
 
     useEffect(() => {
-        setOnce(1)
         function selectList(list) {
-            // console.log(`selectsList`)
+            console.log(`listMany`)
             return list.map(l => {
                 const isSelected = ids !== null ? ids.map(e => String(e[0])).includes(String(l.id)) : false
                 const checkBox = <Checkbox checked={isSelected} onClick={e => e.stopPropagation()} onChange={e => handleCheck(e)} name={props.name} value={l.id} />
@@ -31,37 +33,56 @@ export default function ListMany(props) {
             })
         }
         function handleCheck(e) {
-            const array = ids === null ? [] : ids.slice()
+            const array = ids.slice()
             if (e.target.checked) {
+                props.selectedSpecs.push([e.target.value, 0])
                 array.push([e.target.value, 0])
             }
-            else
+            else {
+                props.selectedSpecs.splice(props.selectedSpecs.indexOf(props.selectedSpecs.find(el => String(el[0]) === e.target.value)), 1)
                 array.splice(array.indexOf(array.find(el => String(el[0]) === e.target.value)), 1)
+            }
             setIds(array)
-            props.handleChange(array)
+            setToSelect(true)
         }
         function handleCheck2(id, e) {
             const array = ids.slice()
             const i = array.indexOf(array.find(el => String(el[0]) === String(id)))
             if (e.target.checked) {
                 array[i][1] = 1
+                props.selectedSpecs[i][1] = 1
             }
-            else
+            else {
                 array[i][1] = 0
-            setIds(array)
-            props.handleChange(array)
-        }
-        if (once === 1) {
-            if (props.list !== null) {
-                const x = selectList(props.list)
-                setList(x)
+                props.selectedSpecs[i][1] = 0
             }
-            else
-                setList(null)
+            setIds(array)
+            setToSelect(true)
+            // console.log(ids)
+            // console.log(props.selectedSpecs)
         }
-    }, [once, props, props.id, ids])
+        if (toSelect || newList !== null) {
+            if (newList === null) {
+                const x = selectList(props.list)
+                setCheckList(x)
+            }
+            else {
+                const list = selectList(newList)
+                setCheckList(list)
+            }
+            setToSelect(false)
+        }
+        if (list !== props.list) {
+            setToSelect(true)
+            setList(props.list)
+        }
+        else {
+            setToSelect(false)
+        }
+    }, [toSelect, props.list, props.name, props.selectedSpecs, ids, list, newList])
 
     return <Grid container>
+        <SearchedhList list={props.list} setNewList={setNewList} />
         <Grid item xs={10} sm={8} md={6} lg={4} xl={3}>
             <Table size='small'>
                 <TableBody>
@@ -69,7 +90,7 @@ export default function ListMany(props) {
                         <TableCell sx={{ border: 'none', paddingX: 0 }}><InputLabel>{config.text[props.mainText]}</InputLabel></TableCell>
                         <TableCell sx={{ border: 'none' }} align='center'><InputLabel>{config.text[props.secondText]}</InputLabel></TableCell>
                     </TableRow>
-                    {list}
+                    {checkList}
                 </TableBody>
             </Table>
         </Grid>

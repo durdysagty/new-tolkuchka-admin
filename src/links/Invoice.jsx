@@ -40,7 +40,7 @@ export default function Invoice(props) {
             console.log('prepareData')
             let result = await getData(props.dataFrom[0])
             if (result.ok)
-                setCurrencies(result.data.map(c => ({
+                setCurrencies(result.data.models.map(c => ({
                     id: c.id,
                     name: c.codeName,
                     realRate: c.realRate,
@@ -169,7 +169,7 @@ export default function Invoice(props) {
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />
-            <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' >
+            <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' mb={1} >
                 <FormHelperText error>{submitError}</FormHelperText>
                 <TextField type='text' label={config.text[keys[0]]} name={keys[0]} onChange={handleChange} value={invoice[keys[0]]} required helperText={error ? validation[keys[0]] : ''} error={error && validation[keys[0]] !== '' ? true : false} />
                 <TextField type='number' onKeyDown={(evt) => config.phoneOnly.includes(evt.key) && evt.preventDefault()} label={config.text.invoicePhone} name={keys[1]} onChange={handleChange} value={invoice[keys[1]]} required helperText={error ? validation[keys[1]] : ''} error={error && validation[keys[1]] !== '' ? true : false} />

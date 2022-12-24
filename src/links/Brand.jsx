@@ -8,6 +8,7 @@ import { setFormData } from '../shared/setData'
 import ImageUpload from '../shared/ImageUpload'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
+import Progress from '../shared/Progress'
 
 const x = {
     name: ''
@@ -86,7 +87,8 @@ export default function Brand(props) {
     }
 
 
-    return (
+    return (id !== '0' && brand.name === '' ?
+        <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />
             <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' >

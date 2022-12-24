@@ -166,7 +166,6 @@ export default function Models(props) {
             delete toChanges[e.target.name]
         else
             setToChanges(prevState => ({ ...prevState, [e.target.name]: ids }))
-        console.log(toChanges)
     }
     //#endregion
     async function submitPrice(e) {
@@ -205,7 +204,7 @@ export default function Models(props) {
                     <Grid item xs='auto'>
                         {pageHeader}
                     </Grid>
-                    {keys.some(k => k === 'price' || k === 'Price') ?
+                    {keys?.some(k => k === 'price' || k === 'Price') ?
                         <Grid item xs='auto'>
                             <Box component='form' onSubmit={submitPrice} margin='auto' sx={{ display: 'inline-flex' }} >
                                 <TextField type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} inputProps={{ step: '0.10' }} onChange={e => setChange(e.target.value)} value={change} />
@@ -236,18 +235,21 @@ export default function Models(props) {
                         </TableBody>
                     </Table> :
                     <Table size='small'>
-                        <TableHeader data={keys.map(k => k === 'isNew' || k === 'isRecommended' ? config.text[`${k}Short`] : k === 'notInUse' ? config.text['isInUseShort'] : config.text[k])} action={props.api === 'entry' || props.api === undefined ? false : true} />
+                        <TableHeader data={keys.map(k => k === 'isNew' || k === 'isRecommended' ? config.text[`${k}Short`] : k === 'notInUse' ? config.text['isInUseShort'] : config.text[k])} action={props.api === 'entry' || props.api === undefined ? false : true} selectable={props.selectable} />
                         <TableBody>
                             {models.map(m => (
                                 <TableRow key={m.id}>
                                     {keys.map((k, i) => (<TableCell key={i}>{typeof (m[k]) === 'boolean' ? <Checkbox onChange={() => changeBoolenProperty(m.id, k)} checked={m[k]} checkedIcon={<CheckBox color='success' />} icon={<Close color='error' />} disabled={k === 'isPaid' || k === 'isDelivered'} /> : k.toLowerCase().includes('date') ? new Date(m[k]).toLocaleString() : k.includes('rice') && !k.includes('Rate') ? <Box><Checkbox checked={toChanges[k] !== undefined && toChanges[k].includes(String(m.id))} value={m.id} name={k} onChange={addToChanges} />{m[k]} </Box> : m[k]}</TableCell>))}
                                     {props.api === 'entry' || props.api === undefined ? null :
                                         <TableCell>
-                                            {props.selectable ?
-                                                <Checkbox checked={props.selectedIds.includes(m.id)} onChange={e => props.handleCheck(m, e)} value={m.name} /> :
-                                                <EditCell api={props.api} id={m.id} api2={props.api2} api3={props.api3} parId={parentId} parName={name} name={m.name} delete={() => prepareDelete(m.id)} pro={props.pro} />
-                                            }
+                                            <EditCell api={props.api} id={m.id} api2={props.api2} api3={props.api3} parId={parentId} parName={name} name={m.name} delete={() => prepareDelete(m.id)} pro={props.pro} />
                                         </TableCell>
+                                    }
+                                    {props.selectable ?
+                                        <TableCell>
+                                            <Checkbox checked={props.selectedIds.includes(m.id)} onChange={e => props.handleCheck(m, e)} value={m.name} />
+                                        </TableCell> :
+                                        null
                                     }
                                 </TableRow>
                             ))}

@@ -7,6 +7,7 @@ import { getEditModel } from '../shared/getData'
 import { setJsonData } from '../shared/setData'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
+import Progress from '../shared/Progress'
 
 const x = {
     name: '',
@@ -78,7 +79,8 @@ export default function Position(props) {
             setSubmitError(config.text.wrong)
     }
 
-    return (
+    return (id !== '0' && position.name === '' ?
+        <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />
             <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' >
@@ -87,7 +89,7 @@ export default function Position(props) {
                 <FormControl variant='standard' sx={{ width: '100%' }} required error={error && validation.level !== '' ? true : false}>
                     <InputLabel id='levelSelect'>{config.text.level}</InputLabel>
                     <Select label={config.text.level} labelId='levelSelect' id='selectLevel' value={position.level} onChange={handleChange} name={keys[1]}>
-                        {[1, 2, 3].map(r => (
+                        {[1, 2, 3, 4].map(r => (
                             <MenuItem key={r} value={r}>{r}</MenuItem>
                         ))}
                     </Select>

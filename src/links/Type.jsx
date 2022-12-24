@@ -7,6 +7,7 @@ import { getEditModel } from '../shared/getData'
 import { setJsonData } from '../shared/setData'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
+import Progress from '../shared/Progress'
 
 const x = {
     nameRu: '',
@@ -16,14 +17,14 @@ const x = {
 const keys = Object.keys(x)
 
 export default function Type(props) {
-
+    //#region  states
     const { id } = useParams()
     const navigate = useNavigate()
     const [type, setType] = useState(x)
     const [validation, setValidation] = useState(x)
     const [error, setError] = useState(false)
     const [once, setOnce] = useState('0')
-
+    //#endregion
     useEffect(() => {
         if (id !== '0') {
             setOnce(1)
@@ -39,7 +40,7 @@ export default function Type(props) {
                 prepareData()
         }
     }, [once, props.api, id, type.nameRu, type.id])
-
+    //#region functions
     function handleChange(e) {
         setType(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
         setValidation(prevState => ({
@@ -59,6 +60,7 @@ export default function Type(props) {
     const [submitError, setSubmitError] = useState('')
 
     const { pro } = useParams()
+    //#endregion
     async function submit(e) {
         e.preventDefault()
         let i = id
@@ -77,7 +79,8 @@ export default function Type(props) {
             setSubmitError(config.text.wrong)
     }
 
-    return (
+    return ((id !== '0' && type.nameRu === '') ?
+        <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />
             <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' >

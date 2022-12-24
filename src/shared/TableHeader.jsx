@@ -22,6 +22,14 @@ export default function TableHeader(props) {
                     </TableCell> :
                     null
                 }
+                {props.selectable ?
+                    <TableCell component='th'>
+                        <strong>
+                            Выбрать
+                        </strong>
+                    </TableCell> :
+                    null
+                }
             </TableRow>
         </TableHead>
     )

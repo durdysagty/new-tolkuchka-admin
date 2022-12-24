@@ -7,6 +7,7 @@ import { getEditModel } from '../shared/getData'
 import { setJsonData } from '../shared/setData'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
+import Progress from '../shared/Progress'
 
 const x = {
     specsValueId: '',
@@ -81,7 +82,8 @@ export default function SpecsValueMod(props) {
     }
 
 
-    return (
+    return (id !== '0' && specsValueMod.nameRu === '' ?
+        <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} name={name} />
             <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' >

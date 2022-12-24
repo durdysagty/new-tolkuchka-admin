@@ -45,7 +45,7 @@ export default function Model(props) {
     const [lines, setLines] = useState(null)
     const [getLines, setGetLines] = useState(false)
     const [specs, setSpecs] = useState(null)
-    const [selectedSpecs, setSelectedSpecs] = useState(null)
+    const [selectedSpecs, setSelectedSpecs] = useState([])
     const [warranties, setWarranties] = useState(null)
     const [getAdditional, setGetAdditional] = useState(false)
     const [once, setOnce] = useState(0)
@@ -63,32 +63,25 @@ export default function Model(props) {
                 setError(config.text.wrong)
             result = await getData(props.dataFrom[1])
             if (result.ok)
-                setTypes(result.data)
+                setTypes(result.data.models)
             else
                 setError(config.text.wrong)
             result = await getData(props.dataFrom[2])
             if (result.ok)
-                setBrands(result.data)
+                setBrands(result.data.models)
             else
                 setError(config.text.wrong)
             result = await getData(props.dataFrom[4])
             if (result.ok)
-                setWarranties(result.data)
+                setWarranties(result.data.models)
             else
                 setError(config.text.wrong)
             result = await getData(props.dataFrom[5])
             if (result.ok)
-                setSpecs(result.data)
+                setSpecs(result.data.models)
             else
                 setError(config.text.wrong)
             if (id !== '0') {
-                result = await getEditModel(props.api, id)
-                if (result.ok) {
-                    setModel(result.data)
-                    setGetAdditional(true)
-                }
-                else
-                    setSubmitError(config.text.wrong)
                 result = await getData(`${props.dataFrom[0]}/modeladlinks/${id}`)
                 if (result.ok)
                     setStepParents(result.data)
@@ -99,6 +92,13 @@ export default function Model(props) {
                     setSelectedSpecs(result.data)
                 else
                     setError(config.text.wrong)
+                result = await getEditModel(props.api, id)
+                if (result.ok) {
+                    setModel(result.data)
+                    setGetAdditional(true)
+                }
+                else
+                    setSubmitError(config.text.wrong)
             }
             else
                 if (stepParents === null)
@@ -110,9 +110,9 @@ export default function Model(props) {
             if (getLines || getAdditional) {
                 setGetLines(false)
                 console.log('getLines')
-                let result = await getData(`${props.dataFrom[3]}?brandId=${model.brandId}`)
+                let result = await getData(`${props.dataFrom[3]}`, null, { [props.dataFrom[2]]: model.brandId })
                 if (result.ok)
-                    setLines(result.data)
+                    setLines(result.data.models)
                 else
                     setError(config.text.wrong)
             }
@@ -149,15 +149,6 @@ export default function Model(props) {
                     return null
             })
         }
-        // let searchTimeOut = null
-        // function changeSearch(e) {
-        //setSearch(e.target.value)
-        // if (searchTimeOut !== null)
-        //     clearTimeout(searchTimeOut)
-        // searchTimeOut = setTimeout(() => {
-        //     setToSelect(true)
-        // }, 1000)
-        // }
         function handleCheck(e) {
             if (e.target.checked) {
                 setModel(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -200,7 +191,6 @@ export default function Model(props) {
                 searchCategories(categories, searchedCategories)
                 list = searchedCategories
             }
-            console.log(list)
             const sc1 = selectCategories(list, false)
             const sc2 = selectCategories(list, true)
             setSelectCats(sc1)
@@ -210,9 +200,9 @@ export default function Model(props) {
             additionalData()
     }, [once, props.api, props.dataFrom, brands, categories, id, model, model.brandId, stepParents, model.categoryId, toSelect, selectedSpecs, getAdditional, getLines, search])
     //#region function
-    function handleCheck(array) {
-        setSelectedSpecs(array)
-    }
+    // function handleCheck(array) {
+    //     setSelectedSpecs(array)
+    // }
 
     function handleChange(e) {
         setModel(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -274,7 +264,7 @@ export default function Model(props) {
             setSubmitError(config.text.wrong)
     }
 
-    return ((id !== '0' && selectedSpecs === null) || brands === null ?
+    return ((id !== '0' && model.brandId === '') || specs === null ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />
@@ -298,7 +288,7 @@ export default function Model(props) {
                 <AccordionList list={brands} name={keys[3]} handleChange={handleChange} accId='brand' dtlId='brands' req={true} error={error} validation={validation[keys[3]]} id={id !== '0' ? model.brandId : undefined} />
                 <AccordionList list={lines} name={keys[4]} handleChange={handleChange} accId='line' dtlId='lines' req={false} error={error} validation={validation[keys[4]]} id={id !== '0' ? model.lineId : undefined} />
                 <AccordionList list={warranties} name={keys[5]} handleChange={handleChange} accId='warranty' dtlId='warranties' req={true} error={error} validation={validation[keys[5]]} id={model.warrantyId} />
-                <ListMany list={specs} name='specs' handleChange={handleCheck} mainText='specs' secondText='isNameUse' req={false} checkList={id !== '0' ? selectedSpecs : undefined} />
+                <ListMany list={specs} name='specs' selectedSpecs={selectedSpecs} mainText='specs' secondText='isNameUse' req={false} checkList={selectedSpecs} />
                 {keys.slice(-3).map((text, i) => (
                     <TextField key={i} type='text' label={config.text[text]} name={text} onChange={handleChange} value={model[text]} required helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
                 ))}

@@ -1,3 +1,4 @@
+//#region  imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import config from '../configs/config.json'
@@ -8,7 +9,8 @@ import { getData, getEditModel } from '../shared/getData'
 import { setFormData } from '../shared/setData'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
-
+import Progress from '../shared/Progress'
+//#endregion
 const x = {
     nameRu: '',
     nameEn: '',
@@ -21,7 +23,7 @@ const x = {
 const keys = Object.keys(x)
 
 export default function Category(props) {
-
+    //#region  states
     const { id } = useParams()
     const navigate = useNavigate()
     const [category, setCategory] = useState(x)
@@ -34,7 +36,7 @@ export default function Category(props) {
     const [selectStepCats, setSelectStepCats] = useState(null)
     const [stepParents, setStepParents] = useState([])
     const [once, setOnce] = useState(0)
-
+    //#endregion
     useEffect(() => {
         setOnce(1)
         async function prepareData() {
@@ -45,11 +47,6 @@ export default function Category(props) {
             else
                 setError(config.text.wrong)
             if (id !== '0') {
-                result = await getEditModel(props.api, id)
-                if (result.ok)
-                    setCategory(result.data)
-                else
-                    setSubmitError(config.text.wrong)
                 result = await getData(`${props.api}/hasproduct/${id}`)
                 if (result.ok)
                     setHasProduct(result.data)
@@ -60,6 +57,11 @@ export default function Category(props) {
                     setStepParents(result.data)
                 else
                     setError(config.text.wrong)
+                result = await getEditModel(props.api, id)
+                if (result.ok)
+                    setCategory(result.data)
+                else
+                    setSubmitError(config.text.wrong)
             }
         }
         function selectCategories(categories, stepParent) {
@@ -177,8 +179,8 @@ export default function Category(props) {
             setSubmitError(config.text.wrong)
     }
 
-
-    return (
+    return ((id !== '0' && category.nameRu === '') || categories === null ?
+        <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />
             <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' >
