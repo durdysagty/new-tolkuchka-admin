@@ -25,11 +25,11 @@ export default function Report(props) {
         setOnce(1)
         async function prepareData() {
             console.log('prepareData')
-            const result = await getData(`${props.api}?start=${start}&end=${end}`)
+            const result = await getData(props.api, null, { start: start, end: end })
             if (result.ok) {
                 setReportOrders(result.data)
-                if (result.data.length > 0) {
-                    const val = result.data.reduce((acc, curVal) => {
+                if (result.data.models.length > 0) {
+                    const val = result.data.models.reduce((acc, curVal) => {
                         acc.profit = acc.profit + curVal.netProfit
                         acc.income = acc.income + curVal.soldPrice
                         return acc

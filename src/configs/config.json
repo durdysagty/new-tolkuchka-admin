@@ -11,6 +11,7 @@
         "justifyContent": "center"
     },
     "text": {
+        "search": "Поиск",
         "aboutRu": "О нас",
         "deliveryRu": "Доставка",
         "aboutEn": "About",

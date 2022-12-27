@@ -1,5 +1,6 @@
 import { TextField } from '@mui/material'
 import { useState } from 'react'
+import config from '../configs/config.json'
 
 
 export default function SearchedhList(props) {
@@ -13,6 +14,6 @@ export default function SearchedhList(props) {
         props.setNewList(newList)
     }
     return (
-        <TextField value={search} onChange={changeSearch} />
+        <TextField label={config.text.search} value={search} onChange={changeSearch} sx={{ marginY: 0 }} />
     )
 }

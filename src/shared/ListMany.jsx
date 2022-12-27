@@ -82,13 +82,17 @@ export default function ListMany(props) {
     }, [toSelect, props.list, props.name, props.selectedSpecs, ids, list, newList])
 
     return <Grid container>
-        <SearchedhList list={props.list} setNewList={setNewList} />
         <Grid item xs={10} sm={8} md={6} lg={4} xl={3}>
             <Table size='small'>
                 <TableBody>
                     <TableRow>
                         <TableCell sx={{ border: 'none', paddingX: 0 }}><InputLabel>{config.text[props.mainText]}</InputLabel></TableCell>
                         <TableCell sx={{ border: 'none' }} align='center'><InputLabel>{config.text[props.secondText]}</InputLabel></TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell colSpan={2} sx={{ border: 'none' }}>
+                            <SearchedhList list={props.list} setNewList={setNewList} />
+                        </TableCell>
                     </TableRow>
                     {checkList}
                 </TableBody>
