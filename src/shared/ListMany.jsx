@@ -82,7 +82,7 @@ export default function ListMany(props) {
     }, [toSelect, props.list, props.name, props.selectedSpecs, ids, list, newList])
 
     return <Grid container>
-        <Grid item xs={10} sm={8} md={6} lg={4} xl={3}>
+        <Grid item xs={10} sm={8} md={7} lg={5}>
             <Table size='small'>
                 <TableBody>
                     <TableRow>

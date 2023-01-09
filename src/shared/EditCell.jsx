@@ -5,26 +5,26 @@ import { Link as RouterLink } from 'react-router-dom'
 export default function EditCell(props) {
     return (
         <Box>
-            <Link to={`/${props.api}/edt/${props.id}${props.parName === undefined ? '' : `/${props.parId}/${props.parName}`}`} component={RouterLink} >
+            <Link to={`/${props.api}/edt/${props.id}${props.parName === undefined ? '' : `/${props.parId}/${props.parName.replace('/', '-')}`}`} component={RouterLink} >
                 <Edit />
             </Link>
             {
                 props.api2 === undefined ?
                     null :
-                    <Link to={`/${props.api2}/${props.api}/${props.id}${props.name === undefined ? '' : `/${props.name}`}`} component={RouterLink} sx={{ marginLeft: 2 }} >
+                    <Link to={`/${props.api2}/${props.api}/${props.id}${props.name === undefined ? '' : `/${props.name.replace('/', '-')}`}`} component={RouterLink} sx={{ marginLeft: 2 }} >
                         <EditAttributesSharp />
                     </Link>
             }
             {
                 props.api3 === undefined ?
                     null :
-                    <Link to={`/${props.api3}/${props.api}/${props.id}${props.name === undefined ? '' : `/${props.name}`}`} component={RouterLink} sx={{ marginLeft: 2 }} >
+                    <Link to={`/${props.api3}/${props.api}/${props.id}${props.name === undefined ? '' : `/${props.name.replace('/', '-')}`}`} component={RouterLink} sx={{ marginLeft: 2 }} >
                         <Print />
                     </Link>
             }
             {
                 props.pro ?
-                    <Link to={`/${props.api}/sim/${props.id}${props.parName === undefined ? '' : `/${props.parId}/${props.parName}`}`} component={RouterLink} sx={{ marginLeft: 2 }} >
+                    <Link to={`/${props.api}/sim/${props.id}${props.parName === undefined ? '' : `/${props.parId}/${props.parName.replace('/', '-')}`}`} component={RouterLink} sx={{ marginLeft: 2 }} >
                         <ContentCopy />
                     </Link> :
                     null

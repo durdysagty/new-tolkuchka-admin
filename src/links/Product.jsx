@@ -104,7 +104,7 @@ export default function Product(props) {
                 console.log('getModels')
                 if (product.lineId === null)
                     product.lineId = ''
-                let result = await getData(props.dataFrom[4], null, { [props.dataFrom[2]]: product.brandId, [props.dataFrom[3]]: product.lineId })
+                let result = await getData(props.dataFrom[4], null, { [props.dataFrom[2]]: product.brandId, [props.dataFrom[3]]: product.lineId !== '' ? product.lineId : null })
                 if (result.ok)
                     setModels(result.data.models)
                 else

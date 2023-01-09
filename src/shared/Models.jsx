@@ -27,7 +27,7 @@ export default function Models(props) {
     //const [lastPage, setLastPage] = useState(null)
     const [page, setPage] = useState(0)
     //const [pagination, setPagination] = useState(null)
-    const [change, setChange] = useState(0)
+    const [change, setChange] = useState('')
     const [toChanges, setToChanges] = useState({})
     const [search, setSearch] = useState('')
     const [toSearch, setToSearch] = useState(false)
@@ -111,7 +111,7 @@ export default function Models(props) {
         function queryPage(p) {
             if (p !== page) {
                 setPage(p)
-                getModels(p)
+                getModels(p, search)
             }
         }
         // to change prices of selected models
@@ -248,35 +248,33 @@ export default function Models(props) {
         clearTimeout(searchTimeOut)
         const timeOut = setTimeout(() => {
             setToSearch(true)
-        }, 4000)
+        }, 1000)
         setSearchTimeOut(timeOut)
     }
     //#endregion
 
     const pageHeader = props.list !== undefined ? null : props.selectable ? <InputLabel>Список</InputLabel> : <PageHeader models={props.models} name={name} path={props.api === 'invoice' || props.api === 'entry' ? undefined : `/${props.api}/scr/0${props.addapi === undefined ? '' : `/${parentId}/${name}`}`} />
 
-    return (table === null ?
+    return (table === null || (items !== null && api !== props.api) ?
         <Progress /> :
         <Box>
             {props.list !== undefined ? null :
-                <Grid container justifyContent='space-between' >
+                <Grid container justifyContent='space-between' alignItems='center' >
                     <Grid item xs='auto'>
                         {pageHeader}
                     </Grid>
                     {keys?.some(k => k === 'price' || k === 'Price') ?
-                        <Grid item xs='auto'>
-                            <Box component='form' onSubmit={submitPrice} margin='auto' sx={{ display: 'inline-flex' }} >
-                                <TextField type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} inputProps={{ step: '0.10' }} onChange={e => setChange(e.target.value)} value={change} />
-                                <Box ml={1}>
+                        <Grid item xs={3}>
+                            <Box component='form' onSubmit={submitPrice} sx={{ display: 'flex' }} >
+                                <TextField label={config.text.price} type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} inputProps={{ step: '0.10' }} onChange={e => setChange(e.target.value)} value={change} />
+                                <Box ml={1} pb={1} alignSelf='end'>
                                     <Button type='submit' variant='contained' size='small'>Изменить</Button>
                                 </Box>
                             </Box>
                         </Grid> :
                         null}
-                    <Grid item xs='auto'>
-                        <Box margin='auto' sx={{ display: 'inline-flex' }} >
-                            <TextField label={config.text.search} type='text' onChange={changeSearch} value={search} />
-                        </Box>
+                    <Grid item xs={4}>
+                        <TextField label={config.text.filtersearch} type='text' onChange={changeSearch} value={search} />
                     </Grid>
                 </Grid>
             }

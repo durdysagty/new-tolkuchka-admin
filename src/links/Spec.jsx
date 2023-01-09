@@ -13,7 +13,7 @@ const x = {
     nameRu: '',
     nameEn: '',
     nameTm: '',
-    order: '',
+    order: 0,
     namingOrder: '',
     isImaged: false,
     isFilter: false

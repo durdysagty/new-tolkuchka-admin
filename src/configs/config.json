@@ -1,7 +1,7 @@
 {
     "apibase": "https://localhost:7240/",
-    "en.apibase": "https://en.localhost:7240/",
-    "tm.apibase": "https://tm.localhost:7240/",
+    "en.apibase": "https://en.localhost:7240.",
+    "tm.apibase": "https://tm.localhost:7240",
     "api": "api/",
     "centerBox": {
         "flex": 1,
@@ -12,6 +12,7 @@
     },
     "text": {
         "search": "Поиск",
+        "filtersearch": "Поиск или фильтр",
         "aboutRu": "О нас",
         "deliveryRu": "Доставка",
         "aboutEn": "About",
