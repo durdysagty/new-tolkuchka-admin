@@ -10,6 +10,7 @@ import { setFormData } from '../shared/setData'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
 import Progress from '../shared/Progress'
+import { wait } from '@testing-library/user-event/dist/utils'
 //#endregion
 const x = {
     nameRu: '',
@@ -36,6 +37,7 @@ export default function Category(props) {
     const [selectStepCats, setSelectStepCats] = useState(null)
     const [stepParents, setStepParents] = useState([])
     const [once, setOnce] = useState(0)
+    const [process, setProcess] = useState(false)
     //#endregion
     useEffect(() => {
         setOnce(1)
@@ -158,6 +160,8 @@ export default function Category(props) {
     //#endregion
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         let i = id
         if (pro === 'sim') {
             delete category.id
@@ -177,9 +181,10 @@ export default function Category(props) {
                 setSubmitError(config.text.already2)
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
-    return ((id !== '0' && category.nameRu === '') || categories === null ?
+    return ((id !== '0' && category.nameRu === '') || categories === null || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />

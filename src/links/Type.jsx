@@ -8,6 +8,7 @@ import { setJsonData } from '../shared/setData'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
 import Progress from '../shared/Progress'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     nameRu: '',
@@ -24,6 +25,7 @@ export default function Type(props) {
     const [validation, setValidation] = useState(x)
     const [error, setError] = useState(false)
     const [once, setOnce] = useState('0')
+    const [process, setProcess] = useState(false)
     //#endregion
     useEffect(() => {
         if (id !== '0') {
@@ -39,7 +41,7 @@ export default function Type(props) {
             if (type.nameRu === '' && once === 1)
                 prepareData()
         }
-    }, [once, props.api, id, type.nameRu, type.id])
+    }, [once, props.api, id, type.nameRu, type.id, process])
     //#region functions
     function handleChange(e) {
         setType(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -63,6 +65,8 @@ export default function Type(props) {
     //#endregion
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         let i = id
         if (pro === 'sim') {
             delete type.id
@@ -77,9 +81,10 @@ export default function Type(props) {
         }
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
-    return ((id !== '0' && type.nameRu === '') ?
+    return ((id !== '0' && type.nameRu === '') || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />

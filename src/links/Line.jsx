@@ -9,6 +9,7 @@ import Progress from '../shared/Progress'
 import AccordionList from '../shared/AccordionList'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     name: '',
@@ -25,6 +26,7 @@ export default function Line(props) {
     const [error, setError] = useState(false)
     const [brands, setBrands] = useState(null)
     const [once, setOnce] = useState(0)
+    const [process, setProcess] = useState(false)
 
     useEffect(() => {
         if (once !== 1)
@@ -46,7 +48,7 @@ export default function Line(props) {
         }
         if (brands === null && once === 1)
             prepareData()
-    }, [once, props.api, props.dataFrom, brands, id])
+    }, [once, props.api, props.dataFrom, brands, id, process])
 
     function handleChange(e) {
         setLine(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -70,6 +72,8 @@ export default function Line(props) {
     const { pro } = useParams()
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         let i = id
         if (pro === 'sim') {
             delete line.id
@@ -83,10 +87,11 @@ export default function Line(props) {
                 setSubmitError(config.text.already2)
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
 
-    return (brands === null ?
+    return (brands === null || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />

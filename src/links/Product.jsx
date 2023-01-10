@@ -12,6 +12,7 @@ import { Autorenew, Close } from '@mui/icons-material'
 import ImageUpload from '../shared/ImageUpload'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
+import { wait } from '@testing-library/user-event/dist/utils'
 //#endregion
 const x = {
     partNo: '',
@@ -51,6 +52,7 @@ export default function Product(props) {
     const [getSpecs, setGetSpecs] = useState(false)
     const [getAdditional, setGetAdditional] = useState(false)
     const [once, setOnce] = useState(0)
+    const [process, setProcess] = useState(false)
     //#endregion
     useEffect(() => {
         if (once !== 1)
@@ -124,7 +126,7 @@ export default function Product(props) {
             prepareData()
         if (product.brandId !== '' && once === 1)
             additionalData()
-    }, [once, props.api, props.dataFrom, id, product, brands, getLines, getModels, getSpecs, getAdditional])
+    }, [once, props.api, props.dataFrom, id, product, brands, getLines, getModels, getSpecs, getAdditional, process])
     // #region functions
     function handleChange(e, i) {
         if (e.target.name === undefined && id !== '0') {
@@ -150,6 +152,10 @@ export default function Product(props) {
             }
             else
                 setImages(e.target.files)
+        }
+        else if (e.target.name === keys[4] || e.target.name === keys[5]) {
+            if (e.target.value > 0)
+                setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
         }
         else if (e.target.name === keys[6] || e.target.name === keys[7] || e.target.name === keys[8] || e.target.name === keys[9])
             setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.checked }))
@@ -250,8 +256,11 @@ export default function Product(props) {
     //#endregion
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         if (specs.length > productSpecsValues.length) {
             setSubmitError(config.text.notAllSpecs)
+            setProcess(false)
             return
         }
         let i = id
@@ -285,9 +294,10 @@ export default function Product(props) {
                 setSubmitError(config.text.already2)
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
-    return ((id !== '0' && product.brandId === '') || brands === null ?
+    return ((id !== '0' && product.brandId === '') || brands === null || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />
@@ -298,7 +308,7 @@ export default function Product(props) {
                 <AccordionList list={lines} name={keys[2]} handleChange={handleChange} accId='line' dtlId='lines' req={false} error={error} validation={validation[keys[2]]} id={product.lineId} />
                 <AccordionList list={models} name={keys[3]} handleChange={handleChange} accId='model' dtlId='models' req={true} error={error} validation={validation[keys[3]]} id={product.modelId} />
                 {keys.slice(4, 6).map((text, i) => (
-                    <TextField type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} inputProps={{ step: '0.10' }} label={config.text[text]} name={text} onChange={handleChange} value={product[text]} key={i} required={i === 0 ? true : false} helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
+                    <TextField type='number' onWheel={e => e.target.blur()} onKeyDown={(e) => ["e", "E", "+", "-", "ArrowDown", "ArrowUp"].includes(e.key) && e.preventDefault()} inputProps={{ step: '0.10' }} label={config.text[text]} name={text} onChange={handleChange} value={product[text]} key={i} required={i === 0 ? true : false} helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
                 ))}
                 <Box my={3}>
                     {keys.slice(-4).map((text, i) => (

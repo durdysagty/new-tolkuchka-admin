@@ -12,6 +12,7 @@ import Progress from '../shared/Progress'
 import AccordionList from '../shared/AccordionList'
 import Models from '../shared/Models'
 import { Delete } from '@mui/icons-material'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     invoiceAddress: '',
@@ -32,6 +33,7 @@ export default function Invoice(props) {
     const [currencies, setCurrencies] = useState(null)
     const [orders, setOrders] = useState([])
     const [once, setOnce] = useState('0')
+    const [process, setProcess] = useState(false)
     //#endregion
     useEffect(() => {
         if (once !== 1)
@@ -67,7 +69,7 @@ export default function Invoice(props) {
         }
         if (currencies === null && once === 1)
             prepareData()
-    }, [once, props.api, props.dataFrom, id, currencies, orders])
+    }, [once, props.api, props.dataFrom, id, currencies, orders, process])
     // #region functions
     function handleChange(e) {
         setInvoice(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -139,6 +141,8 @@ export default function Invoice(props) {
     //#endregion
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         // console.log(orders)
         // console.log(invoice)
         if (orders.length < 1) {
@@ -163,9 +167,10 @@ export default function Invoice(props) {
         }
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
     // const list = currencies.map(c => ({ id: c.id, name: c.codeName }))
-    return ((id !== '0' && invoice.currencyId === '') || currencies === null ?
+    return ((id !== '0' && invoice.currencyId === '') || currencies === null || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />

@@ -1,3 +1,4 @@
+//#region imports
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import config from '../configs/config.json'
@@ -9,6 +10,8 @@ import ImageUpload from '../shared/ImageUpload'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
 import Progress from '../shared/Progress'
+import { wait } from '@testing-library/user-event/dist/utils'
+//#endregion
 
 const x = {
     name: ''
@@ -24,6 +27,7 @@ export default function Brand(props) {
     const [validation, setValidation] = useState(x)
     const [error, setError] = useState(false)
     const [once, setOnce] = useState(0)
+    const [process, setProcess] = useState(false)
 
     useEffect(() => {
         if (id !== '0') {
@@ -39,8 +43,9 @@ export default function Brand(props) {
             if (brand.name === '' && once === 1)
                 prepareData()
         }
-    }, [once, props.api, id, brand.name, brand.id])
+    }, [once, props.api, id, brand.name, brand.id, process])
 
+    //#region functions
     function handleChange(e) {
         if (e.target.name === 'image')
             setImage(e.target.files[0])
@@ -70,8 +75,11 @@ export default function Brand(props) {
     const [submitError, setSubmitError] = useState('')
 
     const { pro } = useParams()
+    //#endregion
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         let i = id
         if (pro === 'sim')
             i = '0'
@@ -84,10 +92,11 @@ export default function Brand(props) {
         }
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
 
-    return (id !== '0' && brand.name === '' ?
+    return ((id !== '0' && brand.name === '') || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />

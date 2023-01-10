@@ -10,6 +10,7 @@ import { r } from '../shared/Result'
 import AccordionList from '../shared/AccordionList'
 import Progress from '../shared/Progress'
 import SubmitButton from '../shared/SubmitButton'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     name: '',
@@ -40,6 +41,7 @@ export default function Slide(props) {
     const [validation, setValidation] = useState(x)
     const [error, setError] = useState(false)
     const [once, setOnce] = useState(0)
+    const [process, setProcess] = useState(false)
 
     useEffect(() => {
         if (id !== '0') {
@@ -55,7 +57,7 @@ export default function Slide(props) {
             if (slide.name === '' && once === 1)
                 prepareData()
         }
-    }, [once, props.api, id, slide.name, slide.id])
+    }, [once, props.api, id, slide.name, slide.id, process])
 
     function handleChange(e) {
         if (e.target.name === 'imageru')
@@ -94,6 +96,8 @@ export default function Slide(props) {
     const { pro } = useParams()
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         let i = id
         if (pro === 'sim')
             i = '0'
@@ -109,9 +113,10 @@ export default function Slide(props) {
         }
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
-    return ((id !== '0' && slide.layout === '') ?
+    return ((id !== '0' && slide.layout === '') || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />

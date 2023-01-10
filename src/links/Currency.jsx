@@ -8,6 +8,7 @@ import { setJsonData } from '../shared/setData'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
 import Progress from '../shared/Progress'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     codeName: '',
@@ -24,6 +25,7 @@ export default function Currency(props) {
     const [validation, setValidation] = useState(x)
     const [error, setError] = useState(false)
     const [once, setOnce] = useState(0)
+    const [process, setProcess] = useState(false)
 
     useEffect(() => {
         if (id !== '0') {
@@ -40,7 +42,7 @@ export default function Currency(props) {
             if (currency.codeName === '' && once === 1)
                 prepareData()
         }
-    }, [once, props.api, id, currency.codeName, currency.id])
+    }, [once, props.api, id, currency.codeName, currency.id, process])
 
     function handleChange(e) {
         setCurrency(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -65,6 +67,8 @@ export default function Currency(props) {
     const { pro } = useParams()
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         let i = id
         if (pro === 'sim') {
             delete currency.id
@@ -78,9 +82,10 @@ export default function Currency(props) {
                 setSubmitError(config.text.already2)
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
-    return (id !== '0' && currency.codeName === '' ?
+    return ((id !== '0' && currency.codeName === '') || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />

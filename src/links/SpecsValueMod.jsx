@@ -8,6 +8,7 @@ import { setJsonData } from '../shared/setData'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
 import Progress from '../shared/Progress'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     specsValueId: '',
@@ -27,6 +28,7 @@ export default function SpecsValueMod(props) {
     const [validation, setValidation] = useState(x)
     const [error, setError] = useState(false)
     const [once, setOnce] = useState(0)
+    const [process, setProcess] = useState(false)
 
     useEffect(() => {
         if (id !== '0') {
@@ -44,7 +46,7 @@ export default function SpecsValueMod(props) {
         }
         if (specsValueMod.specsValueId === '')
             setSpecsValueMod(prevState => ({ ...prevState, specsValueId: parId }))
-    }, [once, props.api, id, parId, specsValueMod.id, specsValueMod.nameRu, specsValueMod.specsValueId])
+    }, [once, props.api, id, parId, specsValueMod.id, specsValueMod.nameRu, specsValueMod.specsValueId, process])
 
     function handleChange(e) {
         setSpecsValueMod(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -68,6 +70,8 @@ export default function SpecsValueMod(props) {
     const { pro } = useParams()
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         let i = id
         if (pro === 'sim')
             i = '0'
@@ -79,10 +83,11 @@ export default function SpecsValueMod(props) {
                 setSubmitError(config.text.already2)
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
 
-    return (id !== '0' && specsValueMod.nameRu === '' ?
+    return ((id !== '0' && specsValueMod.nameRu === '') || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} name={name} />

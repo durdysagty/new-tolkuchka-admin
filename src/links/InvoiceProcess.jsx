@@ -9,6 +9,7 @@ import { setFormData } from '../shared/setData'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
 import Progress from '../shared/Progress'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     user: '',
@@ -30,6 +31,7 @@ export default function InvoiceProcess(props) {
     const [store, setStore] = useState(null)
     const [once, setOnce] = useState('0')
     const [pairs] = useState([])
+    const [process, setProcess] = useState(false)
     //#endregion
     useEffect(() => {
         if (once !== 1)
@@ -86,7 +88,7 @@ export default function InvoiceProcess(props) {
             prepareData()
         if (orders !== null && store == null)
             getStore()
-    }, [once, invoice, props.api, props.dataFrom, id, pairs, orders, store, isFilled])
+    }, [once, invoice, props.api, props.dataFrom, id, pairs, orders, store, isFilled, process])
 
     function setToOrder(id, e) {
         const array = orders.slice()
@@ -127,6 +129,8 @@ export default function InvoiceProcess(props) {
 
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         // console.log(orders)
         // console.log(invoice)
         const response = await setFormData(`${props.api}/store/${id}`, id, null, null, {
@@ -142,8 +146,9 @@ export default function InvoiceProcess(props) {
         }
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
-    return (store === null ?
+    return (store === null || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} api={props.api} pro='process' name={` #${id}`} />

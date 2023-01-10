@@ -9,6 +9,7 @@ import { getEditModel } from '../shared/getData'
 import Progress from '../shared/Progress'
 import { r } from '../shared/Result'
 import { setJsonData } from '../shared/setData'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     aboutRu: '',
@@ -26,6 +27,7 @@ export default function Content(props) {
     const navigate = useNavigate()
     const [content, setContent] = useState(x)
     const [once, setOnce] = useState('0')
+    const [process, setProcess] = useState(false)
 
     useEffect(() => {
         setOnce(1)
@@ -39,7 +41,7 @@ export default function Content(props) {
         }
         if (content.aboutRu === '' && once === 1)
             prepareData()
-    }, [once, props.api, content])
+    }, [once, props.api, content, process])
 
     const [submitError, setSubmitError] = useState('')
 
@@ -49,6 +51,8 @@ export default function Content(props) {
 
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         const response = await setJsonData(props.api, 0, content)
         if (response.ok)
             if (response.result === r.success)
@@ -57,9 +61,10 @@ export default function Content(props) {
                 setSubmitError(config.text.wrong)
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
-    return (content.aboutRu === '' ?
+    return (content.aboutRu === '' || process ?
         <Progress /> :
         <Box>
             <PageHeader id={0} api={props.api} />

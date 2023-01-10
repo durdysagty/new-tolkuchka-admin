@@ -9,6 +9,7 @@ import { setJsonData } from '../shared/setData'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
 import Progress from '../shared/Progress'
+import { wait } from '@testing-library/user-event/dist/utils'
 //#endregion
 const x = {
     nameRu: '',
@@ -25,6 +26,7 @@ export default function Warranty(props) {
     const [validation, setValidation] = useState(x)
     const [error, setError] = useState(false)
     const [once, setOnce] = useState('0')
+    const [process, setProcess] = useState(false)
     //#endregion
     useEffect(() => {
         if (id !== '0') {
@@ -40,7 +42,7 @@ export default function Warranty(props) {
             if (warranty.nameRu === '' && once === 1)
                 prepareData()
         }
-    }, [once, props.api, id, warranty.nameRu, warranty.id])
+    }, [once, props.api, id, warranty.nameRu, warranty.id, process])
     //#region functions
     function handleChange(e) {
         setWarranty(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -65,6 +67,8 @@ export default function Warranty(props) {
     //#endregion
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         let i = id
         if (pro === 'sim') {
             delete warranty.id
@@ -78,10 +82,11 @@ export default function Warranty(props) {
                 setSubmitError(config.text.already2)
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
 
-    return (id !== '0' && warranty.nameRu === '' ?
+    return ((id !== '0' && warranty.nameRu === '') || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />

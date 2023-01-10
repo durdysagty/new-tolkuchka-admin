@@ -9,6 +9,7 @@ import ImageUpload from '../shared/ImageUpload'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
 import Progress from '../shared/Progress'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     specId: '',
@@ -30,6 +31,7 @@ export default function SpecsValue(props) {
     const [validation, setValidation] = useState(x)
     const [error, setError] = useState(false)
     const [once, setOnce] = useState(0)
+    const [process, setProcess] = useState(false)
 
     useEffect(() => {
         if (once !== 1)
@@ -53,7 +55,7 @@ export default function SpecsValue(props) {
             prepareData()
         if (specsValue.specId === '')
             setSpecsValue(prevState => ({ ...prevState, specId: parId }))
-    }, [once, props.api, props.dataFrom, isImaged, id, parId, specsValue.id, specsValue.nameRu, specsValue.specId])
+    }, [once, props.api, props.dataFrom, isImaged, id, parId, specsValue.id, specsValue.nameRu, specsValue.specId, process])
 
     function handleChange(e) {
         if (e.target.name === 'image')
@@ -86,6 +88,8 @@ export default function SpecsValue(props) {
     const { pro } = useParams()
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         let i = id
         if (pro === 'sim')
             i = '0'
@@ -97,10 +101,11 @@ export default function SpecsValue(props) {
                 setSubmitError(config.text.already2)
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
 
-    return (isImaged === null ?
+    return ((isImaged === null) || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} name={name} />

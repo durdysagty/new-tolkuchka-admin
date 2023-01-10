@@ -12,6 +12,7 @@ import Progress from '../shared/Progress'
 import AccordionList from '../shared/AccordionList'
 import Models from '../shared/Models'
 import { Delete } from '@mui/icons-material'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     currencyId: '',
@@ -31,6 +32,7 @@ export default function PurchaseInvoice(props) {
     const [suppliers, setSuppliers] = useState(null)
     const [purchases, setPurchases] = useState([])
     const [once, setOnce] = useState('0')
+    const [process, setProcess] = useState(false)
 
     useEffect(() => {
         if (once !== 1)
@@ -70,7 +72,7 @@ export default function PurchaseInvoice(props) {
         }
         if (currencies === null && once === 1)
             prepareData()
-    }, [once, props.api, props.dataFrom, purchaseInvoice.currencyId, id, purchases, currencies])
+    }, [once, props.api, props.dataFrom, purchaseInvoice.currencyId, id, purchases, currencies, process])
     // #region functions
     function handleChange(e) {
         setPurchaseInvoice(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -151,6 +153,8 @@ export default function PurchaseInvoice(props) {
     //#endregion
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         // console.log(purchases)
         // console.log(purchaseInvoice)
         if (purchases.length < 1) {
@@ -171,9 +175,10 @@ export default function PurchaseInvoice(props) {
         }
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
     // const list = currencies.map(c => ({ id: c.id, name: c.codeName }))
-    return ((id !== '0' && purchaseInvoice.currencyId === '') || currencies === null ?
+    return ((id !== '0' && purchaseInvoice.currencyId === '') || currencies === null || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />

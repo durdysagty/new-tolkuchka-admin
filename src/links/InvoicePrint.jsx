@@ -7,6 +7,7 @@ import TableHeader from '../shared/TableHeader'
 import { getData, getEditModel } from '../shared/getData'
 import SubmitButton from '../shared/SubmitButton'
 import Progress from '../shared/Progress'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     user: '',
@@ -25,6 +26,7 @@ export default function InvoicePrint(props) {
     const [orders, setOrders] = useState(null)
     const [once, setOnce] = useState('0')
     const [amount, setAmount] = useState(0)
+    const [process, setProcess] = useState(false)
     //#endregion
     useEffect(() => {
         if (once !== 1)
@@ -50,17 +52,20 @@ export default function InvoicePrint(props) {
         }
         if (orders === null && once === 1)
             prepareData()
-    }, [once, props.api, props.dataFrom, id, orders])
+    }, [once, props.api, props.dataFrom, id, orders, process])
 
     const [submitError, setSubmitError] = useState('')
-    function submit(e) {
+    async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         const print = document.getElementById('invoice')
         document.getElementById('root').innerHTML = print.innerHTML
         window.print()
         window.location.href = '/invoices'
+        setProcess(false)
     }
-    return (orders === null ?
+    return (orders === null || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} api={props.api} pro='print' name={` #${id}`} />

@@ -12,6 +12,7 @@ import { r } from '../shared/Result'
 import ListMany from '../shared/ListMany'
 import SubmitButton from '../shared/SubmitButton'
 import { ExpandMore } from '@mui/icons-material'
+import { wait } from '@testing-library/user-event/dist/utils'
 //#endregion
 const x = {
     name: '',
@@ -50,6 +51,7 @@ export default function Model(props) {
     const [getAdditional, setGetAdditional] = useState(false)
     const [once, setOnce] = useState(0)
     const [search, setSearch] = useState('')
+    const [process, setProcess] = useState(false)
     //#endregion
     useEffect(() => {
         if (once !== 1)
@@ -198,7 +200,7 @@ export default function Model(props) {
         }
         if (model.brandId !== '' && once === 1)
             additionalData()
-    }, [once, props.api, props.dataFrom, brands, categories, id, model, model.brandId, stepParents, model.categoryId, toSelect, selectedSpecs, getAdditional, getLines, search])
+    }, [once, props.api, props.dataFrom, brands, categories, id, model, model.brandId, stepParents, model.categoryId, toSelect, selectedSpecs, getAdditional, getLines, search, process])
     //#region function
     // function handleCheck(array) {
     //     setSelectedSpecs(array)
@@ -246,6 +248,8 @@ export default function Model(props) {
     //#endregion
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         let i = id
         if (pro === 'sim') {
             delete model.id
@@ -262,9 +266,10 @@ export default function Model(props) {
                 setSubmitError(config.text.already2)
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
-    return ((id !== '0' && model.brandId === '') || specs === null ?
+    return ((id !== '0' && model.brandId === '') || specs === null || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />

@@ -9,6 +9,7 @@ import { setJsonData } from '../shared/setData'
 import Selectables from '../shared/Selectables'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
+import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     login: '',
@@ -26,6 +27,7 @@ export default function Employee(props) {
     const [error, setError] = useState(false)
     const [positions, setPositions] = useState(null)
     const [once, setOnce] = useState(0)
+    const [process, setProcess] = useState(false)
 
     useEffect(() => {
         setOnce(1)
@@ -46,7 +48,7 @@ export default function Employee(props) {
         }
         if (positions === null && once === 1)
             prepareData()
-    }, [once, props.api, props.dataFrom, positions, id])
+    }, [once, props.api, props.dataFrom, positions, id, process])
 
     function handleChange(e) {
         setEmployee(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -70,6 +72,8 @@ export default function Employee(props) {
 
     async function submit(e) {
         e.preventDefault()
+        setProcess(true)
+        await wait(0)
         const response = await setJsonData(props.api, id, employee)
         if (response.ok)
             if (response.result === r.success)
@@ -78,10 +82,11 @@ export default function Employee(props) {
                 setSubmitError(config.text.already2)
         else
             setSubmitError(config.text.wrong)
+        setProcess(false)
     }
 
 
-    return (positions === null ?
+    return (positions === null || process ?
         <Progress /> :
         <Box>
             <PageHeader id={id} api={props.api} />
