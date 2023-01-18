@@ -17,6 +17,11 @@ export default function AccordionList(props) {
     const [newList, setNewList] = useState(null)
     //#endregion
     useEffect(() => {
+        // if (id !== props.id) {
+        //     setId(props.id)
+        //     if (props.id === undefined)
+        //         props.setSelected !== undefined ? props.setSelected('') : setSelected('')
+        // }
         if (list === null)
             setSelected('')
         function selectList(list) {
@@ -30,15 +35,15 @@ export default function AccordionList(props) {
                     {checkBox}
                     <Box sx={{ display: 'inline-flex' }}>
                         {l.name}
-                        {l.list === undefined || l.list.length === 0 || !isSelected ? null : <AccordionList sx={{ display: 'inline-flex' }} parentId={l.id} setSelected={setSelected2} name={props.name2} tableCell={true} list={l.list} handleChange={props.handleChange} accId={`${i}y`} dtlId={`${i}ss`} id={props.id !== '0' ? l.list.map(x => x.id).find((e) => {
-                            return props.checklist.map(e => e.id).includes(String(e))
-                        }) : undefined} />}
+                        {l.list === undefined || l.list.length === 0 || !isSelected ? null : <AccordionList sx={{ display: 'inline-flex' }} parentId={l.id} setSelected={setSelected2} name={props.name2} tableCell={true} list={l.list} handleChange={props.handleChange} linkId={props.linkId} accId={`${i}y`} dtlId={`${i}ss`} id={props.id !== '0' ? l.list.map(x => x.id).find((e) => props.checklist.map(e => e.id).includes(String(e))) : undefined} />}
                     </Box>
                 </Box>
             })
         }
+        //in Model component this AccordionList is used in the useEffect, thus we do not need render component here on every change of CheckBox
+        //Model component use props.linkId, that we will use to check if render or handle needed in this component
         function handleCheck(e, id, parentId) {
-            props.handleChange(e, id, parentId)
+            props.handleChange(e, id, parentId, props.linkId)
             if (e.target.checked) {
                 setId(e.target.value)
                 setSelected2('')
@@ -67,11 +72,6 @@ export default function AccordionList(props) {
                 setSelected('')
                 setId(props.id)
             }
-            // if (search !== '') {
-            //     const newList = props.list.filter(l => l.name.toLowerCase().includes(search.toLowerCase()))
-            //     const x = selectList(newList)
-            //     setCheckList(x)
-            // }
             setToSelect(false)
         }
         if (list !== props.list) {

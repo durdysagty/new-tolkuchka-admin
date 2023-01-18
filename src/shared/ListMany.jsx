@@ -35,14 +35,15 @@ export default function ListMany(props) {
         function handleCheck(e) {
             const array = ids.slice()
             if (e.target.checked) {
-                props.selectedSpecs.push([e.target.value, 0])
+                // props.selectedSpecs.push([e.target.value, 0])
                 array.push([e.target.value, 0])
             }
             else {
-                props.selectedSpecs.splice(props.selectedSpecs.indexOf(props.selectedSpecs.find(el => String(el[0]) === e.target.value)), 1)
+                // props.selectedSpecs.splice(props.selectedSpecs.indexOf(props.selectedSpecs.find(el => String(el[0]) === e.target.value)), 1)
                 array.splice(array.indexOf(array.find(el => String(el[0]) === e.target.value)), 1)
             }
             setIds(array)
+            props.setIds(array)
             setToSelect(true)
         }
         function handleCheck2(id, e) {
@@ -50,13 +51,14 @@ export default function ListMany(props) {
             const i = array.indexOf(array.find(el => String(el[0]) === String(id)))
             if (e.target.checked) {
                 array[i][1] = 1
-                props.selectedSpecs[i][1] = 1
+                //props.selectedSpecs[i][1] = 1
             }
             else {
                 array[i][1] = 0
-                props.selectedSpecs[i][1] = 0
+                //props.selectedSpecs[i][1] = 0
             }
             setIds(array)
+            props.setIds(array)
             setToSelect(true)
             // console.log(ids)
             // console.log(props.selectedSpecs)
@@ -79,7 +81,7 @@ export default function ListMany(props) {
         else {
             setToSelect(false)
         }
-    }, [toSelect, props.list, props.name, props.selectedSpecs, ids, list, newList])
+    }, [toSelect, props.list, props.name, props.selectedSpecs, ids, list, newList, props])
 
     return <Grid container>
         <Grid item xs={10} sm={8} md={7} lg={5}>

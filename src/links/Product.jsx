@@ -115,7 +115,7 @@ export default function Product(props) {
             if (getSpecs || getAdditional) {
                 setGetSpecs(false)
                 console.log('getSpecs')
-                let result = await getData(`${props.dataFrom[6]}/value?modelId=${product.modelId}`)
+                let result = await getData(`${props.dataFrom[6]}/value`, null, { [props.dataFrom[4]]: product.modelId })
                 if (result.ok)
                     setSpecs(result.data)
                 else
@@ -152,10 +152,6 @@ export default function Product(props) {
             }
             else
                 setImages(e.target.files)
-        }
-        else if (e.target.name === keys[4] || e.target.name === keys[5]) {
-            if (e.target.value > 0)
-                setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
         }
         else if (e.target.name === keys[6] || e.target.name === keys[7] || e.target.name === keys[8] || e.target.name === keys[9])
             setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.checked }))
@@ -204,19 +200,41 @@ export default function Product(props) {
             const array = productSpecsValues.slice()
             if (e.target.checked) {
                 array.push(e.target.value)
-            }
-            else
-                array.splice(array.indexOf(e.target.value), 1)
-            if (id !== null && e.target.value !== id) {
-                array.splice(array.indexOf(String(id)), 1)
+                //if we have other productSpecsValue of this Spec then remove
+                const removePsv = array.find(e => e === String(id))
+                if (removePsv !== undefined) {
+                    const i = array.indexOf(removePsv)
+                    array.splice(i, 1)
+                }
                 const array2 = productSpecsValueMods.slice()
-                const removePsvm = array2.find(e => e.parentId === id)
+                const removePsvm = array2.find(e => parseInt(e.parentId) === parseInt(id))
                 if (removePsvm !== undefined) {
-                    const i = array.indexOf(removePsvm)
+                    const i = array2.indexOf(removePsvm)
+                    array2.splice(i, 1)
+                    setProductSpecsValueMods(array2)
+                }
+
+            }
+            else {
+                array.splice(array.indexOf(e.target.value), 1)
+                const array2 = productSpecsValueMods.slice()
+                const removePsvm = array2.find(a => parseInt(a.parentId) === parseInt(e.target.value))
+                if (removePsvm !== undefined) {
+                    const i = array2.indexOf(removePsvm)
                     array2.splice(i, 1)
                     setProductSpecsValueMods(array2)
                 }
             }
+            // if (id !== undefined && e.target.value !== String(id)) {
+            //     array.splice(array.indexOf(String(id)), 1)
+            //     const array2 = productSpecsValueMods.slice()
+            //     const removePsvm = array2.find(e => e.parentId === id)
+            //     if (removePsvm !== undefined) {
+            //         const i = array2.indexOf(removePsvm)
+            //         array2.splice(i, 1)
+            //         setProductSpecsValueMods(array2)
+            //     }
+            // }
             setProductSpecsValues(array)
         }
         else {
@@ -227,14 +245,14 @@ export default function Product(props) {
             }
             if (e.target.checked) {
                 array.push(psvm)
+                const removePsvm = array.find(e => e.id === String(id))
+                if (removePsvm !== undefined) {
+                    const i = array.indexOf(removePsvm)
+                    array.splice(i, 1)
+                }
             }
             else {
-                const i = array.indexOf(psvm)
-                array.splice(i, 1)
-            }
-            if (id !== null && e.target.value !== id) {
-                const removePsvm = array.find(e => e.parentId === parentId)
-                const i = array.indexOf(removePsvm)
+                const i = array.indexOf(array.find(a => a.id === e.target.value))
                 array.splice(i, 1)
             }
             setProductSpecsValueMods(array)

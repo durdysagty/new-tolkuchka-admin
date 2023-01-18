@@ -219,7 +219,7 @@ export default function Models(props) {
         e.preventDefault()
         const price = parseFloat(change)
         const response = await setFormData(`${props.api}/changeprice`, '0', null, null, {
-            price: price,
+            price: price.toLocaleString(),
             priceIds: toChanges.price !== undefined ? toChanges.price : null,
             newPriceIds: toChanges.newPrice !== undefined ? toChanges.newPrice : null
         })

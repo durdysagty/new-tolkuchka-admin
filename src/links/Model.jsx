@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import config from '../configs/config.json'
 import PageHeader from '../shared/PageHeader'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Checkbox, FormHelperText, TextField, Typography } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Checkbox, FormHelperText, InputLabel, Table, TableBody, TableCell, TableRow, TextField, Typography } from '@mui/material'
 import { getData, getEditModel } from '../shared/getData'
 import { setFormData } from '../shared/setData'
 import Progress from '../shared/Progress'
@@ -46,13 +46,21 @@ export default function Model(props) {
     const [lines, setLines] = useState(null)
     const [getLines, setGetLines] = useState(false)
     const [specs, setSpecs] = useState(null)
-    const [selectedSpecs, setSelectedSpecs] = useState([])
+    const [selectedSpecIds, setSelectedSpecIds] = useState([])
+    const [selectedSpecs, setSelectedSpecs] = useState(null)
+    const [getSelectedSpecs, setGetSelectedSpecs] = useState(false)
     const [warranties, setWarranties] = useState(null)
+    const [products, setProducts] = useState(null)
+    const [productSpecsValues, setProductSpecsValues] = useState([])
+    const [productSpecsValueMods, setProductSpecsValueMods] = useState([])
     const [getAdditional, setGetAdditional] = useState(false)
+    const [productsHandled, setProductsHandled] = useState(null)
+    const [handleProduct, setHandleProduct] = useState(false)
     const [once, setOnce] = useState(0)
     const [search, setSearch] = useState('')
     const [process, setProcess] = useState(false)
     //#endregion
+    const { pro } = useParams()
     useEffect(() => {
         if (once !== 1)
             setOnce(1)
@@ -91,9 +99,22 @@ export default function Model(props) {
                     setError(config.text.wrong)
                 result = await getData(`${props.api}/specs/${id}`)
                 if (result.ok)
-                    setSelectedSpecs(result.data)
+                    setSelectedSpecIds(result.data)
                 else
                     setError(config.text.wrong)
+                result = await getData(props.dataFrom[6], null, { [props.api]: id })
+                if (result.ok)
+                    setProducts(result.data)
+                else
+                    setError(config.text.wrong)
+                result = await getData(`${props.api}/specvalues/${id}`)
+                if (result.ok)
+                    setProductSpecsValues(result.data)
+                else
+                    setSubmitError(config.text.wrong)
+                result = await getData(`${props.api}/specvaluemods/${id}`)
+                if (result.ok)
+                    setProductSpecsValueMods(result.data)
                 result = await getEditModel(props.api, id)
                 if (result.ok) {
                     setModel(result.data)
@@ -117,6 +138,32 @@ export default function Model(props) {
                     setLines(result.data.models)
                 else
                     setError(config.text.wrong)
+            }
+            if (pro === "edt" && (getSelectedSpecs || getAdditional)) {
+                console.log('getSelectedSpecs')
+                setGetSelectedSpecs(false)
+                let ids = selectedSpecIds.map(s => parseInt(s[0]))
+                if (selectedSpecs !== null)
+                    ids = ids.filter(s => !selectedSpecs.some(x => x.id === s))
+                if (ids.length > 0) {
+                    const result = await getData(`${props.dataFrom[5]}/value`, null, { [props.dataFrom[5]]: JSON.stringify(ids) })
+                    if (result.ok) {
+                        if (selectedSpecs !== null) {
+                            const array = selectedSpecs.concat(result.data)
+                            setSelectedSpecs(array)
+                        }
+                        else
+                            setSelectedSpecs(result.data)
+                    }
+                    else
+                        setError(config.text.wrong)
+                }
+                //to remove productSpecsValues that not included any on selectedSpecs list
+                if (productSpecsValues.length > 0 && selectedSpecs !== null) {
+                    const correctedProductSpecsValues = productSpecsValues.filter(psv => selectedSpecs.filter(psv => selectedSpecIds.some(ss => ss[0] === parseInt(psv.id))).some(ss => ss.list.some(l => l.id === parseInt(psv.id))))
+                    setProductSpecsValues(correctedProductSpecsValues)
+                }
+                setHandleProduct(true)
             }
         }
         function selectCategories(categories, stepParent) {
@@ -170,7 +217,6 @@ export default function Model(props) {
             setStepParents(array)
             setToSelect(true)
         }
-        // let searchedCategories = []
         function searchCategories(categories, searchedCategories) {
             console.log('searchCategories')
             categories.forEach(c => {
@@ -180,6 +226,106 @@ export default function Model(props) {
                     searchCategories(c.list, searchedCategories)
             })
             return searchedCategories
+        }
+        function handleProducts() {
+            console.log('handleProducts')
+            const specs = selectedSpecs.filter(psv => selectedSpecIds.some(ss => parseInt(ss[0]) === parseInt(psv.id)))
+            const prs = <Box>
+                <InputLabel>{config.text.products}</InputLabel>
+                {products.models.map(p => {
+                    return <Box key={p.id}>
+                        <Typography>{p.name}</Typography>
+                        {<Box mb={2}>
+                            <Table size='small'>
+                                <TableBody>
+                                    {specs.map((s, i) => <TableRow key={i}>
+                                        <TableCell>
+                                            {s.name}
+                                        </TableCell>
+                                        <TableCell>
+                                            <AccordionList level={1} name='productSpecsValues' name2='productSpecsValueMods' tableCell={true} list={s.list} checklist={productSpecsValueMods.filter(x => x.productId === p.id)} handleChange={handleSpecs} linkId={p.id} accId={`${i}x`} dtlId={`${i}s`} id={id !== '0' ? s.list.map(x => x.id).find((e) => {
+                                                return productSpecsValues.filter(x => x.productId === p.id).map(x => x.id).includes(String(e))
+                                            }) : undefined} />
+                                        </TableCell>
+                                    </TableRow>)}
+                                </TableBody>
+                            </Table>
+                        </Box>}
+                    </Box>
+                })}
+            </Box>
+            setProductsHandled(prs)
+            setHandleProduct(false)
+        }
+        function handleSpecs(e, id, parentId, productId) {
+            if (e.target.name === 'productSpecsValues') {
+                const array = productSpecsValues.slice()
+                const psv = {
+                    id: e.target.value,
+                    productId: productId
+                }
+                if (e.target.checked) {
+                    array.push(psv)
+                    //if we have other productSpecsValue of this Spec then remove
+                    const removePsv = array.find(e => e.id === String(id) && e.productId === psv.productId)
+                    if (removePsv !== undefined) {
+                        const i = array.indexOf(removePsv)
+                        array.splice(i, 1)
+                    }
+                    const array2 = productSpecsValueMods.slice()
+                    const removePsvm = array2.find(e => parseInt(e.parentId) === parseInt(id) && e.productId === psv.productId)
+                    if (removePsvm !== undefined) {
+                        const i = array2.indexOf(removePsvm)
+                        array2.splice(i, 1)
+                        setProductSpecsValueMods(array2)
+                    }
+                }
+                else {
+                    const removePsv = array.find(e => e.id === psv.id && e.productId === psv.productId)
+                    const i = array.indexOf(removePsv)
+                    array.splice(i, 1)
+                    const array2 = productSpecsValueMods.slice()
+                    const removePsvm = array2.find(e => parseInt(e.parentId) === parseInt(psv.id) && e.productId === psv.productId)
+                    if (removePsvm !== undefined) {
+                        const i = array2.indexOf(removePsvm)
+                        array2.splice(i, 1)
+                        setProductSpecsValueMods(array2)
+                    }
+                }
+                //this used to remove productSpecsValueMod if exist
+                // if (id !== undefined && e.target.value !== String(id)) {
+                //     const array2 = productSpecsValueMods.slice()
+                //     const removePsvm = array2.find(a => a.parentId === id && a.productId === productId)
+                //     if (removePsvm !== undefined) {
+                //         const i = array2.indexOf(removePsvm)
+                //         array2.splice(i, 1)
+                //         setProductSpecsValueMods(array2)
+                //     }
+                // }
+                setProductSpecsValues(array)
+            }
+            else {
+                const array = productSpecsValueMods.slice()
+                const psvm = {
+                    id: e.target.value,
+                    productId: productId,
+                    parentId: parentId
+                }
+                if (e.target.checked) {
+                    array.push(psvm)
+                    const removePsvm = array.find(e => e.id === String(id) && e.productId === psvm.productId)
+                    if (removePsvm !== undefined) {
+                        const i = array.indexOf(removePsvm)
+                        array.splice(i, 1)
+                    }
+                }
+                else {
+                    const i = array.indexOf(array.find(a => a.id === e.target.value && a.productId === productId))
+                    array.splice(i, 1)
+                }
+                setProductSpecsValueMods(array)
+            }
+            setHandleProduct(true)
         }
         if (categories === null && once === 1)
             prepareData()
@@ -198,13 +344,17 @@ export default function Model(props) {
             setSelectCats(sc1)
             setSelectStepCats(sc2)
         }
-        if (model.brandId !== '' && once === 1)
+        if ((model.brandId !== '' && once === 1) || getSelectedSpecs)
             additionalData()
-    }, [once, props.api, props.dataFrom, brands, categories, id, model, model.brandId, stepParents, model.categoryId, toSelect, selectedSpecs, getAdditional, getLines, search, process])
+        if (handleProduct)
+            handleProducts()
+        // console.log(products)
+        // console.log(selectedSpecs)
+        // console.log(selectedSpecIds)
+        // console.log(productSpecsValues)
+        // console.log(productSpecsValueMods)
+    }, [once, props.api, props.dataFrom, brands, categories, id, model, model.brandId, stepParents, model.categoryId, toSelect, selectedSpecIds, getAdditional, getLines, search, products, productSpecsValues, productSpecsValueMods, selectedSpecs, getSelectedSpecs, handleProduct, pro, process])
     //#region function
-    // function handleCheck(array) {
-    //     setSelectedSpecs(array)
-    // }
 
     function handleChange(e) {
         setModel(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -221,6 +371,11 @@ export default function Model(props) {
                 setLines(null)
             }
         }
+    }
+
+    function handleSelectedSpecIds(ids) {
+        setSelectedSpecIds(ids)
+        setGetSelectedSpecs(true)
     }
 
     function invalid(e) {
@@ -244,26 +399,40 @@ export default function Model(props) {
     }
     const [submitError, setSubmitError] = useState('')
 
-    const { pro } = useParams()
     //#endregion
     async function submit(e) {
         e.preventDefault()
         setProcess(true)
         await wait(0)
+        if (pro === "edt" && selectedSpecIds.length * products.models.length > productSpecsValues.length) {
+            setSubmitError(config.text.notAllSpecs)
+            setProcess(false)
+            return
+        }
         let i = id
         if (pro === 'sim') {
             delete model.id
             i = '0'
         }
-        const response = await setFormData(props.api, i, model, null, selectedSpecs.length > 0 ? {
+        const response = await setFormData(props.api, i, model, null, selectedSpecIds.length > 0 ? {
             adLinks: stepParents.length > 0 ? stepParents : null,
-            specs: selectedSpecs
+            specs: selectedSpecIds,
+            productSpecsValues: pro === "edt" ? productSpecsValues.map(x => {
+                return [x.productId, parseInt(x.id)]
+            }) : null,
+            productSpecsValueMods: pro === "edt" ? productSpecsValueMods.map(x => {
+                return [x.productId, parseInt(x.id)]
+            }) : null
         } : null)
         if (response.ok)
             if (response.result === r.success)
                 navigate(-1)
-            else
-                setSubmitError(config.text.already2)
+            else {
+                if (pro === "edt")
+                    setSubmitError(config.text.alreadyModel)
+                else
+                    setSubmitError(config.text.already2)
+            }
         else
             setSubmitError(config.text.wrong)
         setProcess(false)
@@ -293,10 +462,11 @@ export default function Model(props) {
                 <AccordionList list={brands} name={keys[3]} handleChange={handleChange} accId='brand' dtlId='brands' req={true} error={error} validation={validation[keys[3]]} id={id !== '0' ? model.brandId : undefined} />
                 <AccordionList list={lines} name={keys[4]} handleChange={handleChange} accId='line' dtlId='lines' req={false} error={error} validation={validation[keys[4]]} id={id !== '0' ? model.lineId : undefined} />
                 <AccordionList list={warranties} name={keys[5]} handleChange={handleChange} accId='warranty' dtlId='warranties' req={true} error={error} validation={validation[keys[5]]} id={model.warrantyId} />
-                <ListMany list={specs} name='specs' selectedSpecs={selectedSpecs} mainText='specs' secondText='isNameUse' req={false} checkList={selectedSpecs} />
+                <ListMany list={specs} name='specs' selectedSpecs={selectedSpecIds} setIds={handleSelectedSpecIds} mainText='specs' secondText='isNameUse' req={false} checkList={selectedSpecIds} />
                 {keys.slice(-3).map((text, i) => (
                     <TextField key={i} type='text' label={config.text[text]} name={text} onChange={handleChange} value={model[text]} required helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
                 ))}
+                {productsHandled}
                 <SubmitButton id={id} pro={pro} />
             </Box >
         </Box>
