@@ -2,6 +2,7 @@
     "apibase": "https://localhost:7240/",
     "en.apibase": "https://en.localhost:7240.",
     "tm.apibase": "https://tm.localhost:7240",
+    "domain": "localhost",
     "api": "api/",
     "centerBox": {
         "flex": 1,
