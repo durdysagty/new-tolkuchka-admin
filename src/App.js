@@ -1,10 +1,10 @@
 //#region imports
 import { useEffect, useState } from 'react'
 import config from './configs/config.json'
-import { DataContext } from './configs/dataContext'
+import { globalLogout } from './shared/globalFunctions'
 import { BrowserRouter, Link as RouterLink, Route, Routes } from 'react-router-dom'
 import { AppBar, Box, Button, createTheme, CssBaseline, FormHelperText, styled, TextField, ThemeProvider, Drawer, Toolbar, IconButton, List, ListItemButton, Divider, ListItemIcon, ListItemText, Link } from '@mui/material'
-import { AltRoute, Assessment, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPaste, CurrencyExchange, DesignServices, EventSeat, Home, Label, Menu, QrCode, Receipt, ReceiptLong, Source, Store } from '@mui/icons-material'
+import { AltRoute, Assessment, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPaste, CurrencyExchange, DesignServices, EventSeat, Home, Label, Logout, Menu, QrCode, Receipt, ReceiptLong, Source, Store } from '@mui/icons-material'
 import Employee from './links/Employee'
 import Progress from './shared/Progress'
 import Position from './links/Position'
@@ -219,18 +219,16 @@ const theme = createTheme(
 
 function App() {
   const [authState, setAuthState] = useState(null)
-  const [token, setToken] = useState(null)
   const loginResult = { success: 0, fail: 1 }
-  function setCredentials(token) {
-    document.cookie = `user={}; max-age=345600; samesite=strict; secure`
-    localStorage.setItem('MIT', token)
-    setToken(token)
+  function setCredentials(loginResponse) {
+    document.cookie = 'user={}; max-age=604800; samesite=strict; secure'
+    document.cookie = `hce=${loginResponse.text}; max-age=604800; samesite=none; secure`
+    localStorage.setItem('MIT', loginResponse.data)
     setAuthState(true)
   }
-  function removeCredentials() {
-    document.cookie = `user={}; max-age=-1`
-    localStorage.removeItem("MIT")
-    //window.location.href = '/'
+  function logout() {
+    globalLogout()
+    setAuthState(false)
   }
 
   const [openDr, setOpenDr] = useState(false)
@@ -241,13 +239,6 @@ function App() {
 
   function handleDrawerClose() {
     setOpenDr(false)
-  }
-
-  const defaults = {
-    authState: authState,
-    token: token,
-    login: login,
-    logout: removeCredentials
   }
 
   const apis = {
@@ -285,41 +276,8 @@ function App() {
         setAuthState(false)
     }
     else {
-      removeCredentials()
       setAuthState(false)
     }
-
-    // setCl(true)
-    // async function isLogged() {
-    //   console.log('isLogged')
-    //   const c = document.cookie
-    //   if (c.includes('user=')) {
-    //     console.log('afterLogged')
-    //     try {
-    //       const response = await fetch(`${config.apibase}${apis.l}`, {
-    //         method: 'GET',
-    //         credentials: 'include'
-    //       })
-    //       if (response.ok) {
-    //         const loginResponse = await response.json()
-    //         if (loginResponse.result === loginResult.success)
-    //           setCredentials(loginResponse.text, loginResponse.data)
-    //         else
-    //           removeCredentials()
-    //       }
-    //       else
-    //         removeCredentials()
-    //     }
-    //     catch {
-    //       removeCredentials()
-    //     }
-    //   }
-    //   else
-    //     setAuthState(false)
-    // }
-    // if (cl === true)
-    //   isLogged()
-    // }, [cl, apis.l, loginResult.success])
   }, [authState])
 
   const [loginError, setLoginError] = useState('')
@@ -341,7 +299,7 @@ function App() {
       if (response.ok) {
         const loginResponse = await response.json()
         if (loginResponse.result === loginResult.success) {
-          setCredentials(loginResponse.data)
+          setCredentials(loginResponse)
         }
         else {
           setLoginError(config.text.loginError)
@@ -432,75 +390,81 @@ function App() {
   }
 
   return (
-    <DataContext.Provider value={defaults}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {authState === null ?
-          <Progress /> :
-          authState === false ?
-            <Box sx={config.centerBox}>
-              <Box>
-                <Box component='form' onSubmit={submit} onInvalid={invalid} sx={{ maxWidth: 450 }} margin='auto' >
-                  <FormHelperText error>{loginError}</FormHelperText>
-                  {Object.keys(s).map((text) => (
-                    <TextField type={text === 'password' ? text : 'text'} label={config.text[text]} name={text} onChange={handleChange} value={admin[text]} key={text} required helperText={logError ? validation[text] : ''} error={logError && validation[text] !== '' ? true : false} />
-                  ))}
-                  <Box textAlign='end' marginTop={3}>
-                    <Button type='submit' variant='contained'>Войти</Button>
-                  </Box>
-                </Box >
-              </Box>
-            </Box> :
-            <Box sx={{ display: 'flex' }}>
-              <BrowserRouter>
-                <StyledAppBar position='fixed' open={openDr}>
-                  <Toolbar>
-                    <IconButton color='inherit' aria-label='open drawer' onClick={handleDrawerOpen} edge='start' sx={{ marginRight: 5, ...(openDr && { display: 'none' }), }}>
-                      <Menu />
-                    </IconButton>
-                    <IconButton color='secondary'>
-                      <Link to='/' component={RouterLink} height={24} >
-                        <Home />
-                      </Link>
-                    </IconButton>
-                  </Toolbar>
-                </StyledAppBar>
-                <StyledDrawer variant='permanent' open={openDr}>
-                  <DrawerHeader>
-                    <IconButton onClick={handleDrawerClose}>
-                      {theme.direction === 'rtl' ? <ChevronRight /> : <ChevronLeft />}
-                    </IconButton>
-                  </DrawerHeader>
-                  <Divider />
-                  <List>
-                    {Object.keys(links).map(l => (
-                      links[l][0] === null ?
-                        null :
-                        <Link key={l} to={`${l}`} component={RouterLink} >
-                          <ListItemButton sx={{ inHeight: 8, justifyContent: openDr ? 'initial' : 'center', px: 2.5, }}>
-                            <ListItemIcon sx={{ minWidth: 0, r: openDr ? 3 : 'auto', justifyContent: 'center', }}>
-                              {links[l][0]}
-                            </ListItemIcon>
-                            <ListItemText primary={config.text[l]} sx={{ opacity: openDr ? 1 : 0, marginLeft: openDr ? 2 : 0 }} />
-                          </ListItemButton>
-                        </Link>
-                    ))}
-                  </List>
-                </StyledDrawer>
-                <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
-                  <DrawerHeader />
-                  <Routes>
-                    <Route path='/' element={null} />
-                    {Object.keys(links).map(l => (
-                      <Route key={l} path={l} element={links[l][1]} />
-                    ))}
-                  </Routes>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {authState === null ?
+        <Progress /> :
+        authState === false ?
+          <Box sx={config.centerBox}>
+            <Box>
+              <Box component='form' onSubmit={submit} onInvalid={invalid} sx={{ maxWidth: 450 }} margin='auto' >
+                <FormHelperText error>{loginError}</FormHelperText>
+                {Object.keys(s).map((text) => (
+                  <TextField type={text === 'password' ? text : 'text'} label={config.text[text]} name={text} onChange={handleChange} value={admin[text]} key={text} required helperText={logError ? validation[text] : ''} error={logError && validation[text] !== '' ? true : false} />
+                ))}
+                <Box textAlign='end' marginTop={3}>
+                  <Button type='submit' variant='contained'>Войти</Button>
                 </Box>
-              </BrowserRouter>
+              </Box >
             </Box>
-        }
-      </ThemeProvider>
-    </DataContext.Provider>
+          </Box> :
+          <Box sx={{ display: 'flex' }}>
+            <BrowserRouter>
+              <StyledAppBar position='fixed' open={openDr}>
+                <Toolbar>
+                  <IconButton color='inherit' aria-label='open drawer' onClick={handleDrawerOpen} edge='start' sx={{ marginRight: 5, ...(openDr && { display: 'none' }), }}>
+                    <Menu />
+                  </IconButton>
+                  <IconButton color='secondary'>
+                    <Link to='/' component={RouterLink} height={24} >
+                      <Home />
+                    </Link>
+                  </IconButton>
+                </Toolbar>
+              </StyledAppBar>
+              <StyledDrawer variant='permanent' open={openDr}>
+                <DrawerHeader>
+                  <IconButton onClick={handleDrawerClose}>
+                    {theme.direction === 'rtl' ? <ChevronRight /> : <ChevronLeft />}
+                  </IconButton>
+                </DrawerHeader>
+                <Divider />
+                <List>
+                  {Object.keys(links).map(l => (
+                    links[l][0] === null ?
+                      null :
+                      <Link key={l} to={`${l}`} component={RouterLink} >
+                        <ListItemButton sx={{ inHeight: 8, justifyContent: openDr ? 'initial' : 'center', px: 2.5, }}>
+                          <ListItemIcon sx={{ minWidth: 0, r: openDr ? 3 : 'auto', justifyContent: 'center', }}>
+                            {links[l][0]}
+                          </ListItemIcon>
+                          <ListItemText primary={config.text[l]} sx={{ opacity: openDr ? 1 : 0, marginLeft: openDr ? 2 : 0 }} />
+                        </ListItemButton>
+                      </Link>
+                  ))}
+                  <Link to={'/'} component={RouterLink} onClick={logout} >
+                    <ListItemButton sx={{ inHeight: 8, justifyContent: openDr ? 'initial' : 'center', px: 2.5, }}>
+                      <ListItemIcon sx={{ minWidth: 0, r: openDr ? 3 : 'auto', justifyContent: 'center', }}>
+                        <Logout />
+                      </ListItemIcon>
+                      <ListItemText primary={config.text.exit} sx={{ opacity: openDr ? 1 : 0, marginLeft: openDr ? 2 : 0 }} />
+                    </ListItemButton>
+                  </Link>
+                </List>
+              </StyledDrawer>
+              <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
+                <DrawerHeader />
+                <Routes>
+                  <Route path='/' element={null} />
+                  {Object.keys(links).map(l => (
+                    <Route key={l} path={l} element={links[l][1]} />
+                  ))}
+                </Routes>
+              </Box>
+            </BrowserRouter>
+          </Box>
+      }
+    </ThemeProvider>
   )
 }
 

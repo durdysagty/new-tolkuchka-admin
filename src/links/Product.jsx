@@ -8,11 +8,12 @@ import { getData, getEditModel } from '../shared/getData'
 import { setFormData } from '../shared/setData'
 import Progress from '../shared/Progress'
 import AccordionList from '../shared/AccordionList'
-import { Autorenew, Close } from '@mui/icons-material'
+import { Close } from '@mui/icons-material'
 import ImageUpload from '../shared/ImageUpload'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
 import { wait } from '@testing-library/user-event/dist/utils'
+import AutorenewRotate from '../shared/AutorenewRotate'
 //#endregion
 const x = {
     partNo: '',
@@ -340,7 +341,7 @@ export default function Product(props) {
                 </Box>
                 <Box display='flex'>
                     <InputLabel>{config.text.specs}</InputLabel>
-                    <Autorenew onClick={() => setGetSpecs(true)} sx={{ cursor: 'pointer' }} />
+                    <AutorenewRotate update={() => setGetSpecs(true)} />
                 </Box>
                 {specs === null ? null :
                     <Box mb={2}>

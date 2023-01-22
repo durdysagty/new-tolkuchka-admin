@@ -13,6 +13,7 @@ import ListMany from '../shared/ListMany'
 import SubmitButton from '../shared/SubmitButton'
 import { ExpandMore } from '@mui/icons-material'
 import { wait } from '@testing-library/user-event/dist/utils'
+import AutorenewRotate from '../shared/AutorenewRotate'
 //#endregion
 const x = {
     name: '',
@@ -227,14 +228,28 @@ export default function Model(props) {
             })
             return searchedCategories
         }
+        async function updateSelectedSpecs() {
+            let ids = selectedSpecIds.map(s => parseInt(s[0]))
+            if (ids.length > 0) {
+                const result = await getData(`${props.dataFrom[5]}/value`, null, { [props.dataFrom[5]]: JSON.stringify(ids) })
+                if (result.ok)
+                    setSelectedSpecs(result.data)
+                else
+                    setError(config.text.wrong)
+            }
+            setHandleProduct(true)
+        }
         function handleProducts() {
             console.log('handleProducts')
             const specs = selectedSpecs.filter(psv => selectedSpecIds.some(ss => parseInt(ss[0]) === parseInt(psv.id)))
             const prs = <Box>
-                <InputLabel>{config.text.products}</InputLabel>
+                <Box display='flex'>
+                    <InputLabel>{config.text.products}</InputLabel>
+                    <AutorenewRotate update={updateSelectedSpecs} />
+                </Box>
                 {products.models.map(p => {
-                    return <Box key={p.id}>
-                        <Typography>{p.name}</Typography>
+                    return <Box key={p.id} mt={3}>
+                        <Typography mb={1}>{p.name}</Typography>
                         {<Box mb={2}>
                             <Table size='small'>
                                 <TableBody>
@@ -464,7 +479,7 @@ export default function Model(props) {
                 <AccordionList list={warranties} name={keys[5]} handleChange={handleChange} accId='warranty' dtlId='warranties' req={true} error={error} validation={validation[keys[5]]} id={model.warrantyId} />
                 <ListMany list={specs} name='specs' selectedSpecs={selectedSpecIds} setIds={handleSelectedSpecIds} mainText='specs' secondText='isNameUse' req={false} checkList={selectedSpecIds} />
                 {keys.slice(-3).map((text, i) => (
-                    <TextField key={i} type='text' label={config.text[text]} name={text} onChange={handleChange} value={model[text]} required helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
+                    <TextField key={i} type='text' label={config.text[text]} name={text} onChange={handleChange} value={model[text]} required helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} multiline />
                 ))}
                 {productsHandled}
                 <SubmitButton id={id} pro={pro} />

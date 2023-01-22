@@ -1,34 +1,32 @@
 import config from '../configs/config.json'
+import { globalLogout } from './globalFunctions'
 
 export async function getData(api, lang = null, optional = null) {
-    try {
-        let query = ''
-        if (optional !== null) {
-            query = '?'
-            for (let k in optional)
-                query += `keys=${k}&values=${optional[k]}&`
+    let query = ''
+    if (optional !== null) {
+        query = '?'
+        for (let k in optional)
+            query += `keys=${k}&values=${optional[k]}&`
+    }
+    const response = await fetch(`${lang === null || lang === 'ru' ? config.apibase : config[`${lang}.apibase`]}${config.api}${api}${query}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem("MIT")
         }
-        const response = await fetch(`${lang === null || lang === 'ru' ? config.apibase : config[`${lang}.apibase`]}${config.api}${api}${query}`, {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem("MIT")
-            }
-        })
-        if (response.ok) {
-            const result = await response.json()
-            return {
-                ok: true,
-                data: result
-            }
-        }
-        else {
-            return {
-                ok: false
-            }
+    })
+    if (response.ok) {
+        const result = await response.json()
+        return {
+            ok: true,
+            data: result
         }
     }
-    catch {
+    else if (response.status === 401) {
+        globalLogout()
+        window.location.href = '/'
+    }
+    else {
         return {
             ok: false
         }
@@ -50,6 +48,10 @@ export async function getEditModel(api, id = '') {
                 ok: true,
                 data: result
             }
+        }
+        else if (response.status === 401) {
+            globalLogout()
+            window.location.href = '/'
         }
         else {
             return {
