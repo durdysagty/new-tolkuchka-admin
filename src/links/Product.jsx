@@ -17,14 +17,14 @@ import AutorenewRotate from '../shared/AutorenewRotate'
 //#endregion
 const x = {
     partNo: '',
-    //categoryId: '',
-    //typeId: '',
     brandId: '',
     lineId: '',
     modelId: '',
-    //warrantyId: '',
     price: '',
     newPrice: '',
+    descRu: '',
+    descEn: '',
+    descTm: '',
     notInUse: false,
     isRecommended: false,
     isNew: false,
@@ -154,7 +154,7 @@ export default function Product(props) {
             else
                 setImages(e.target.files)
         }
-        else if (e.target.name === keys[6] || e.target.name === keys[7] || e.target.name === keys[8] || e.target.name === keys[9])
+        else if (e.target.name === keys[9] || e.target.name === keys[10] || e.target.name === keys[11] || e.target.name === keys[12])
             setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.checked }))
         else
             setProduct(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -328,6 +328,9 @@ export default function Product(props) {
                 <AccordionList list={models} name={keys[3]} handleChange={handleChange} accId='model' dtlId='models' req={true} error={error} validation={validation[keys[3]]} id={product.modelId} />
                 {keys.slice(4, 6).map((text, i) => (
                     <TextField type='number' onWheel={e => e.target.blur()} onKeyDown={(e) => ["e", "E", "+", "-", "ArrowDown", "ArrowUp"].includes(e.key) && e.preventDefault()} inputProps={{ step: '0.10' }} label={config.text[text]} name={text} onChange={handleChange} value={product[text]} key={i} required={i === 0 ? true : false} helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
+                ))}
+                {keys.slice(6, 9).map((text, i) => (
+                    <TextField key={i} type='text' label={config.text[text]} name={text} onChange={handleChange} value={product[text]} multiline />
                 ))}
                 <Box my={3}>
                     {keys.slice(-4).map((text, i) => (

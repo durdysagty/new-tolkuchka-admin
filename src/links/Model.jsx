@@ -159,6 +159,8 @@ export default function Model(props) {
                     else
                         setError(config.text.wrong)
                 }
+                else
+                    setSelectedSpecs([])
                 //to remove productSpecsValues that not included any on selectedSpecs list
                 if (productSpecsValues.length > 0 && selectedSpecs !== null) {
                     const correctedProductSpecsValues = productSpecsValues.filter(psv => selectedSpecs.filter(psv => selectedSpecIds.some(ss => ss[0] === parseInt(psv.id))).some(ss => ss.list.some(l => l.id === parseInt(psv.id))))
