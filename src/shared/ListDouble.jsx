@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Checkbox, Grid, InputLabel, Table, TableBody, TableCell, TableRow, Typography } from '@mui/material'
 import config from '../configs/config.json'
-import { useEffect } from 'react'
 import SearchedhList from './SearchedhList'
 
-export default function ListMany(props) {
+export default function ListDouble(props) {
     const [ids, setIds] = useState(props.checkList)
     const [toSelect, setToSelect] = useState(true)
     const [checkList, setCheckList] = useState(null)
@@ -13,7 +12,7 @@ export default function ListMany(props) {
 
     useEffect(() => {
         function selectList(list) {
-            console.log(`listMany`)
+            console.log(`listDouble`)
             return list.map(l => {
                 const isSelected = ids !== null ? ids.map(e => String(e[0])).includes(String(l.id)) : false
                 const checkBox = <Checkbox checked={isSelected} onClick={e => e.stopPropagation()} onChange={e => handleCheck(e)} name={props.name} value={l.id} />
@@ -63,6 +62,7 @@ export default function ListMany(props) {
             // console.log(ids)
             // console.log(props.selectedSpecs)
         }
+        // used for search in list
         if (toSelect || newList !== null) {
             if (newList === null) {
                 const x = selectList(props.list)
@@ -81,7 +81,7 @@ export default function ListMany(props) {
         else {
             setToSelect(false)
         }
-    }, [toSelect, props.list, props.name, props.selectedSpecs, ids, list, newList, props])
+    }, [toSelect, props.list, props.name, ids, list, newList, props])
 
     return <Grid container>
         <Grid item xs={10} sm={8} md={7} lg={5}>

@@ -18,6 +18,7 @@ export async function setFormData(api, id, data, images = null, optional = null)
         if (optional !== null) {
             for (let key in optional)
                 if (optional[key] !== null)
+                    // if objects are in the array they should be stringified
                     if (typeof optional[key] === 'string' || typeof optional[key] === 'boolean')
                         formData.append(key, optional[key])
                     else if (optional[key].length === undefined)

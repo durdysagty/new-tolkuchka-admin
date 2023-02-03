@@ -9,7 +9,7 @@ import { setFormData } from '../shared/setData'
 import Progress from '../shared/Progress'
 import AccordionList from '../shared/AccordionList'
 import { r } from '../shared/Result'
-import ListMany from '../shared/ListMany'
+import ListDouble from '../shared/ListDouble'
 import SubmitButton from '../shared/SubmitButton'
 import { ExpandMore } from '@mui/icons-material'
 import { wait } from '@testing-library/user-event/dist/utils'
@@ -479,9 +479,9 @@ export default function Model(props) {
                 <AccordionList list={brands} name={keys[3]} handleChange={handleChange} accId='brand' dtlId='brands' req={true} error={error} validation={validation[keys[3]]} id={id !== '0' ? model.brandId : undefined} />
                 <AccordionList list={lines} name={keys[4]} handleChange={handleChange} accId='line' dtlId='lines' req={false} error={error} validation={validation[keys[4]]} id={id !== '0' ? model.lineId : undefined} />
                 <AccordionList list={warranties} name={keys[5]} handleChange={handleChange} accId='warranty' dtlId='warranties' req={true} error={error} validation={validation[keys[5]]} id={model.warrantyId} />
-                <ListMany list={specs} name='specs' selectedSpecs={selectedSpecIds} setIds={handleSelectedSpecIds} mainText='specs' secondText='isNameUse' req={false} checkList={selectedSpecIds} />
+                <ListDouble list={specs} name='specs' setIds={handleSelectedSpecIds} mainText='specs' secondText='isNameUse' checkList={selectedSpecIds} />
                 {keys.slice(-3).map((text, i) => (
-                    <TextField key={i} type='text' label={config.text[text]} name={text} onChange={handleChange} value={model[text]} required helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} multiline />
+                    <TextField key={i} type='text' label={config.text[text]} name={text} onChange={handleChange} value={model[text]} required helperText={error ? validation[text] : ''} error={error && validation[text] !== '' ? true : false} />
                 ))}
                 {productsHandled}
                 <SubmitButton id={id} pro={pro} />

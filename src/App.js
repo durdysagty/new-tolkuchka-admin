@@ -4,7 +4,7 @@ import config from './configs/config.json'
 import { globalLogout } from './shared/globalFunctions'
 import { BrowserRouter, Link as RouterLink, Route, Routes } from 'react-router-dom'
 import { AppBar, Box, Button, createTheme, CssBaseline, FormHelperText, styled, TextField, ThemeProvider, Drawer, Toolbar, IconButton, List, ListItemButton, Divider, ListItemIcon, ListItemText, Link } from '@mui/material'
-import { AltRoute, Assessment, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPaste, CurrencyExchange, DesignServices, EventSeat, Home, Label, Logout, Menu, QrCode, Receipt, ReceiptLong, Source, Store } from '@mui/icons-material'
+import { AltRoute, Assessment, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPaste, CurrencyExchange, DesignServices, EventSeat, Home, Label, Logout, Menu, QrCode, Receipt, ReceiptLong, Source, Store, TextSnippet } from '@mui/icons-material'
 import Employee from './links/Employee'
 import Progress from './shared/Progress'
 import Position from './links/Position'
@@ -28,6 +28,7 @@ import Invoice from './links/Invoice'
 import InvoicePrint from './links/InvoicePrint'
 import InvoiceProcess from './links/InvoiceProcess'
 import Report from './links/Report'
+import Article from './links/Article'
 //#endregion
 //#region theming
 const drawerWidth = 190
@@ -217,6 +218,32 @@ const theme = createTheme(
 )
 //#endregion
 
+const apis = {
+  ar: 'article',
+  br: 'brand',
+  co: 'content',
+  ct: 'category',
+  cr: 'currency',
+  em: 'employee',
+  en: 'entry',
+  hd: 'heading',
+  in: 'invoice',
+  ln: 'login',
+  li: 'line',
+  ml: 'model',
+  po: 'position',
+  pi: 'purchaseInvoice',
+  pr: 'product',
+  re: 'report',
+  sl: 'slide',
+  sp: 'spec',
+  su: 'supplier',
+  sv: 'specsvalue',
+  sm: 'specsvaluemod',
+  wr: 'warranty',
+  tp: 'type'
+}
+
 function App() {
   const [authState, setAuthState] = useState(null)
   const loginResult = { success: 0, fail: 1 }
@@ -241,31 +268,7 @@ function App() {
     setOpenDr(false)
   }
 
-  const apis = {
-    br: 'brand',
-    co: 'content',
-    ct: 'category',
-    cr: 'currency',
-    em: 'employee',
-    en: 'entry',
-    in: 'invoice',
-    ln: 'login',
-    li: 'line',
-    ml: 'model',
-    po: 'position',
-    pi: 'purchaseInvoice',
-    pr: 'product',
-    re: 'report',
-    sl: 'slide',
-    sp: 'spec',
-    su: 'supplier',
-    sv: 'specsvalue',
-    sm: 'specsvaluemod',
-    wr: 'warranty',
-    tp: 'type'
-  }
 
-  // const [cl, setCl] = useState(false)
   useEffect(() => {
     const c = document.cookie
     if (c.includes('user=')) {
@@ -280,6 +283,7 @@ function App() {
     }
   }, [authState])
 
+  //#region functions
   const [loginError, setLoginError] = useState('')
 
   async function login(login, password) {
@@ -346,7 +350,7 @@ function App() {
     e.preventDefault()
     login(admin.log, admin.password)
   }
-
+  //#endregion
   const links = {
     types: [<DesignServices />, <Models models={config.text.types} api={apis.tp} pro={true} />],
     'type/:pro/:id': [null, <Type api={apis.tp} />],
@@ -386,6 +390,8 @@ function App() {
     'position/:pro/:id': [null, <Position api={apis.po} />],
     content: [<Source />, <Content api={`${apis.co}`} />],
     report: [<Assessment />, <Report api={apis.re} />],
+    articles: [<TextSnippet />, <Models models={config.text.articles} api={apis.ar} pro={true} />],
+    'article/:pro/:id': [null, <Article api={apis.ar} addapi={apis.hd} />],
     entries: [<ContentPaste />, <Models models={config.text.entries} api={apis.en} />],
   }
 
