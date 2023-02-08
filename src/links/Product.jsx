@@ -72,6 +72,12 @@ export default function Product(props) {
                         result.data.partNo = ''
                     if (result.data.newPrice === null)
                         result.data.newPrice = ''
+                    if (result.data.descRu === null)
+                        result.data.descRu = ''
+                    if (result.data.descEn === null)
+                        result.data.descEn = ''
+                    if (result.data.descTm === null)
+                        result.data.descTm = ''
                     setProduct(result.data)
                     setGetAdditional(true)
                 }
@@ -295,10 +301,10 @@ export default function Product(props) {
             }
         }
         product.price = parseFloat(product.price)
-        product.price = product.price.toLocaleString()
+        product.price = product.price.toLocaleString().replace('\u00A0', '')
         if (product.newPrice !== '') {
             product.newPrice = parseFloat(product.newPrice)
-            product.newPrice = product.newPrice.toLocaleString()
+            product.newPrice = product.newPrice.toLocaleString().replace('\u00A0', '')
         }
         const response = await setFormData(props.api, i, product, imagesArray, {
             specsValues: productSpecsValues.length > 0 ? productSpecsValues : null,
