@@ -128,6 +128,8 @@
         "isInUseShort": "Акт",
         "isNew": "Новинка",
         "isNewShort": "Нов",
+        "isForHome": "На домашней",
+        "isForHomeShort": "Дом",
         "onOrder": "Под заказ",
         "level": "Уровень доступа",
         "parent": "Материнская категория",
@@ -231,7 +233,7 @@
     "image": {
         "brand": "180x60",
         "product": "600x600",
-        "slide": "990x450",
+        "slide": "600x300",
         "slideleft": "220x300",
         "specsValue": "25x25"
     },

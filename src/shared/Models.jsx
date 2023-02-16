@@ -73,7 +73,7 @@ export default function Models(props) {
                     </Table>) :
                     (<Box>
                         <Table size='small'>
-                            <TableHeader data={keys.map(k => k === 'isNew' || k === 'isRecommended' ? config.text[`${k}Short`] : k === 'notInUse' ? config.text['isInUseShort'] : config.text[k])} action={props.api === 'entry' || props.api === undefined ? false : true} selectable={props.selectable} />
+                            <TableHeader data={keys.map(k => k === 'isNew' || k === 'isRecommended' || k === 'isForHome' ? config.text[`${k}Short`] : k === 'notInUse' ? config.text['isInUseShort'] : config.text[k])} action={props.api === 'entry' || props.api === undefined ? false : true} selectable={props.selectable} />
                             <TableBody>
                                 {items.models.map(m => (
                                     <TableRow key={m.id}>

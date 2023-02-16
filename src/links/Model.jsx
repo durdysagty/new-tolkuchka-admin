@@ -374,18 +374,23 @@ export default function Model(props) {
     //#region function
 
     function handleChange(e) {
-        setModel(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
-        setValidation(prevState => ({
-            ...prevState,
-            [e.target.name]: ''
-        }))
-        if (e.target.name === 'brandId') {
+        if (e.target.name === 'lineId' && !e.target.checked) {
             setModel(prevState => ({ ...prevState, lineId: '' }))
-            if (e.target.checked) {
-                setGetLines(true)
-            }
-            if (!e.target.checked) {
-                setLines(null)
+        }
+        else {
+            setModel(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
+            setValidation(prevState => ({
+                ...prevState,
+                [e.target.name]: ''
+            }))
+            if (e.target.name === 'brandId') {
+                setModel(prevState => ({ ...prevState, lineId: '' }))
+                if (e.target.checked) {
+                    setGetLines(true)
+                }
+                if (!e.target.checked) {
+                    setLines(null)
+                }
             }
         }
     }
