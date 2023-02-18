@@ -11,6 +11,7 @@ import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
 import Progress from '../shared/Progress'
 import { wait } from '@testing-library/user-event/dist/utils'
+import ImageUpload from '../shared/ImageUpload'
 //#endregion
 const x = {
     nameRu: '',
@@ -29,6 +30,7 @@ export default function Category(props) {
     const navigate = useNavigate()
     const [category, setCategory] = useState(x)
     const [hasProduct, setHasProduct] = useState(false)
+    const [image, setImage] = useState(null)
     const [validation, setValidation] = useState(x)
     const [error, setError] = useState(false)
     const [categories, setCategories] = useState(null)
@@ -129,7 +131,9 @@ export default function Category(props) {
     }, [once, props.api, categories, id, category, stepParents, hasProduct, category.parentId])
     //#region functions 
     function handleChange(e) {
-        if (e.target.name === keys[5] || e.target.name === keys[6])
+        if (e.target.name === 'image')
+            setImage(e.target.files[0])
+        else if (e.target.name === keys[5] || e.target.name === keys[6])
             setCategory(prevState => ({ ...prevState, [e.target.name]: e.target.checked }))
         else
             setCategory(prevState => ({ ...prevState, [e.target.name]: e.target.value }))
@@ -171,12 +175,14 @@ export default function Category(props) {
             category.parentId = '0'
         if (category.order === '')
             category.order = '0'
-        const response = await setFormData(props.api, i, category, null, stepParents.length > 0 ? {
+        const response = await setFormData(props.api, i, category, image === null ? null : [image], stepParents.length > 0 ? {
             adLinks: stepParents
         } : null)
         if (response.ok)
             if (response.result === r.success)
                 navigate(-1)
+            else if (response.result === r.noImage)
+                setSubmitError(config.text.noImageCategory)
             else
                 setSubmitError(config.text.already2)
         else
@@ -214,6 +220,7 @@ export default function Category(props) {
                         <Checkbox checked={category[text]} onChange={e => handleChange(e)} name={text} />
                     </Grid>
                 ))}
+                <ImageUpload handleChange={handleChange} id={id} notRequired={true} image='category' />
                 <SubmitButton id={id} pro={pro} />
             </Box >
         </Box>
