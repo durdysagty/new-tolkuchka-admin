@@ -8,7 +8,7 @@ import { getData, getEditModel } from '../shared/getData'
 import { setFormData } from '../shared/setData'
 import Progress from '../shared/Progress'
 import AccordionList from '../shared/AccordionList'
-import { Close } from '@mui/icons-material'
+import { Close, Warning } from '@mui/icons-material'
 import ImageUpload from '../shared/ImageUpload'
 import { r } from '../shared/Result'
 import SubmitButton from '../shared/SubmitButton'
@@ -379,7 +379,11 @@ export default function Product(props) {
                             const name = `${id}-${i}.jpg`
                             return (<Grid item mx={1} mb={1} key={i}>
                                 <Box textAlign='end'>
-                                    <Close onClick={e => handleChange(e, i)} sx={{ cursor: 'pointer' }} />
+                                    {
+                                        i === 0 ?
+                                            <Warning /> :
+                                            <Close onClick={e => handleChange(e, i)} sx={{ cursor: 'pointer' }} />
+                                    }
                                 </Box>
                                 <InputLabel sx={{ cursor: 'pointer', border: 1, borderRadius: '7%', textAlign: 'center' }}>
                                     <img src={`${config.apibase}images/product/small/${name}?w=64&h=64&fit=crop&auto=format`} srcSet={`${config.apibase}images/products/small/${name}?w=64&h=64&fit=crop&auto=format&dpr=2 2x`} alt={`${product.modelId}-${id}-${i}`} style={{ verticalAlign: 'middle' }} onError={e => e.target.src = `${config.apibase}images/0.jpg?w=64&h=64&fit=crop&auto=format`} />
