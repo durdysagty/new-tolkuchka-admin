@@ -40,7 +40,7 @@ export default function InvoicePrint(props) {
             }
             else
                 setSubmitError(config.text.wrong)
-            result = await getData(`${props.api}/orders/${id}`, result.data.language)
+            result = await getData(`${props.api}/orders/${id}`, config.text[result.data.language])
             if (result.ok) {
                 result.data.forEach(p => p.orderPrice = parseFloat(p.orderPrice))
                 const amount = result.data.reduce((acc, curVal) => acc + curVal.orderPrice * curVal.quantity, 0)

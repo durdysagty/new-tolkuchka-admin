@@ -52,6 +52,9 @@ export default function Report(props) {
     const [submitError, setSubmitError] = useState('')
     function submit() {
         setReportOrders(null)
+        setProfit(0)
+        setIncome(0)
+        setProfitability(0)
     }
 
     return (reportOrders === null ?

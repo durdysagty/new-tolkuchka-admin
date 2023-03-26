@@ -88,7 +88,7 @@ export default function AccordionList(props) {
         // return setId(null)
     }, [toSelect, props, props.id, id, selected, list, newList])
 
-    return <Accordion>
+    return <Accordion disabled={props.disabled}>
         <AccordionSummary sx={props.sx} expandIcon={<ExpandMore />} aria-controls={props.dtlId} id={props.accId}>
             {props.tableCell ?
                 <Box ml={2}>{selected} {selected2}</Box> :

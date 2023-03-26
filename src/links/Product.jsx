@@ -220,7 +220,6 @@ export default function Product(props) {
                     array2.splice(i, 1)
                     setProductSpecsValueMods(array2)
                 }
-
             }
             else {
                 array.splice(array.indexOf(e.target.value), 1)
@@ -315,8 +314,12 @@ export default function Product(props) {
         if (response.ok)
             if (response.result === r.success)
                 navigate(-1)
-            else
+            else {
+                product.price = product.price.replace(',', '.')
+                if (product.newPrice !== '')
+                    product.newPrice = product.newPrice.replace(',', '.')
                 setSubmitError(config.text.already2)
+            }
         else
             setSubmitError(config.text.wrong)
         setProcess(false)

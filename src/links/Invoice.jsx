@@ -11,7 +11,7 @@ import SubmitButton from '../shared/SubmitButton'
 import Progress from '../shared/Progress'
 import AccordionList from '../shared/AccordionList'
 import Models from '../shared/Models'
-import { Delete } from '@mui/icons-material'
+import { Delete, LibraryAdd } from '@mui/icons-material'
 import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
@@ -34,6 +34,7 @@ export default function Invoice(props) {
     const [orders, setOrders] = useState([])
     const [once, setOnce] = useState('0')
     const [process, setProcess] = useState(false)
+    const [lastId, setLastId] = useState(1)
     //#endregion
     useEffect(() => {
         if (once !== 1)
@@ -55,6 +56,7 @@ export default function Invoice(props) {
                 if (result.ok) {
                     result.data.forEach(p => p.orderPrice = parseFloat(p.orderPrice))
                     setOrders(result.data)
+                    setLastId(result.data.at(-1).id)
                 }
                 else
                     setError(config.text.wrong)
@@ -103,24 +105,43 @@ export default function Invoice(props) {
         const array = orders.slice()
         if (e !== undefined && e.target.checked) {
             const currency = currencies.find(c => c.id === parseInt(invoice.currencyId))
+            let id = lastId + 1
             const order = {
+                id: id,
                 productId: o.id,
                 name: e.target.value,
-                orderPrice: parseFloat(parseFloat(currency.priceRate) * (o.newPrice === null ? o.price : o.newPrice)),
+                orderPrice: Math.round(parseFloat(parseFloat(currency.priceRate) * (o.newPrice === null ? o.price : o.newPrice)) * 100) / 100,
                 quantity: 1
             }
             array.push(order)
+            setLastId(id)
         }
         else {
-            array.splice(array.indexOf(array.find(a => a.productId === o.productId)), 1)
+            array.splice(array.indexOf(array.find(a => a.id === o.id)), 1)
         }
         setOrders(array)
     }
 
+    function copy(o) {
+        const array = orders.slice()
+        const a = array.find(a => a.id === o.id)
+        let id = lastId + 1
+        const order = {
+            id: id,
+            productId: a.productId,
+            name: a.name,
+            orderPrice: a.orderPrice,
+            quantity: 1
+        }
+        array.push(order)
+        setLastId(id)
+        setOrders(array)
+    }
+
     function handleOrderPrice(id, e) {
-        if (e.target.value > 0) {
+        if (e.target.value >= 0) {
             const array = orders.slice()
-            const o = array.find(p => p.productId === id)
+            const o = array.find(a => a.id === id)
             o.orderPrice = parseFloat(e.target.value)
             setOrders(array)
         }
@@ -129,7 +150,7 @@ export default function Invoice(props) {
     function handleOrderQuantity(id, e) {
         if (e.target.value > 0) {
             const array = orders.slice()
-            const p = array.find(p => p.productId === id)
+            const p = array.find(p => p.id === id)
             p.quantity = parseInt(e.target.value)
             setOrders(array)
         }
@@ -147,6 +168,7 @@ export default function Invoice(props) {
         // console.log(invoice)
         if (orders.length < 1) {
             setSubmitError(config.text.noPurchase)
+            setProcess(false)
             return
         }
         let i = id
@@ -187,7 +209,7 @@ export default function Invoice(props) {
                             <TableHeader data={orderKeys.map(k => config.text[k])} action={true} />
                             <TableBody>
                                 {orders.map(o => {
-                                    return <TableRow key={o.productId}>
+                                    return <TableRow key={o.id}>
                                         <TableCell>
                                             {o.productId}
                                         </TableCell>
@@ -195,13 +217,14 @@ export default function Invoice(props) {
                                             {o.name}
                                         </TableCell>
                                         <TableCell>
-                                            <TextField type='number' onKeyDown={(evt) => config.decimalOnly.includes(evt.key) && evt.preventDefault()} required value={o.orderPrice} onChange={e => handleOrderPrice(o.productId, e)} />
+                                            <TextField type='number' onKeyDown={(evt) => config.decimalOnly.includes(evt.key) && evt.preventDefault()} required value={o.orderPrice} onChange={e => handleOrderPrice(o.id, e)} />
                                         </TableCell>
                                         <TableCell>
-                                            <TextField type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} required value={o.quantity} onChange={e => handleOrderQuantity(o.productId, e)} />
+                                            <TextField type='number' onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()} required value={o.quantity} onChange={e => handleOrderQuantity(o.id, e)} />
                                         </TableCell>
                                         <TableCell>
                                             <Delete onClick={() => handleOrder(o)} sx={{ cursor: 'pointer' }} />
+                                            <LibraryAdd onClick={() => copy(o)} sx={{ cursor: 'pointer' }} />
                                         </TableCell>
                                     </TableRow>
                                 })}

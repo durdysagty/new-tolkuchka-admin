@@ -157,9 +157,11 @@ export default function Models(props) {
             }
         }
         else {
-            if (props.list.models.length > 0)
-                prepareKeys(Object.keys(props.list.models[0]))
-            setItems(props.list)
+            if (items === null) {
+                if (props.list.models.length > 0)
+                    prepareKeys(Object.keys(props.list.models[0]))
+                setItems(props.list)
+            }
         }
         if (items !== null) {
             console.log('items')
@@ -253,7 +255,7 @@ export default function Models(props) {
     }
     //#endregion
 
-    const pageHeader = props.list !== undefined ? null : props.selectable ? <InputLabel>Список</InputLabel> : <PageHeader models={props.models} name={name} path={props.api === 'invoice' || props.api === 'entry' ? undefined : `/${props.api}/scr/0${props.addapi === undefined ? '' : `/${parentId}/${name}`}`} />
+    const pageHeader = props.list !== undefined ? null : props.selectable ? props.listName !== undefined ? <InputLabel>{props.listName}</InputLabel> : <InputLabel>Список</InputLabel> : <PageHeader models={props.models} name={name} path={props.api === 'invoice' || props.api === 'entry' ? undefined : `/${props.api}/scr/0${props.addapi === undefined ? '' : `/${parentId}/${name}`}`} />
 
     return (table === null || (items !== null && api !== props.api) ?
         <Progress /> :

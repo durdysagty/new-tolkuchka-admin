@@ -49,7 +49,7 @@ export default function InvoiceProcess(props) {
             }
             else
                 setSubmitError(config.text.wrong)
-            result = await getData(`${props.api}/store/${id}`, result.data.language)
+            result = await getData(`${props.api}/store/${id}`, config.text[result.data.language])
             if (result.ok) {
                 result.data.forEach(d => {
                     if (d.purchaseId !== null) {

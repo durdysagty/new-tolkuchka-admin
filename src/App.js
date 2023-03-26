@@ -4,7 +4,7 @@ import config from './configs/config.json'
 import { globalLogout } from './shared/globalFunctions'
 import { BrowserRouter, Link as RouterLink, Route, Routes } from 'react-router-dom'
 import { AppBar, Box, Button, createTheme, CssBaseline, FormHelperText, styled, TextField, ThemeProvider, Drawer, Toolbar, IconButton, List, ListItemButton, Divider, ListItemIcon, ListItemText, Link } from '@mui/material'
-import { AltRoute, Assessment, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPaste, CurrencyExchange, DesignServices, EventSeat, Home, Label, Logout, Menu, QrCode, Receipt, ReceiptLong, Source, Store, TextSnippet } from '@mui/icons-material'
+import { AltRoute, Assessment, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPaste, CurrencyExchange, DesignServices, EventSeat, Home, Label, Logout, Menu, QrCode, Receipt, ReceiptLong, Source, Store, TextRotationAngleup, TextSnippet } from '@mui/icons-material'
 import Employee from './links/Employee'
 import Progress from './shared/Progress'
 import Position from './links/Position'
@@ -29,6 +29,7 @@ import InvoicePrint from './links/InvoicePrint'
 import InvoiceProcess from './links/InvoiceProcess'
 import Report from './links/Report'
 import Article from './links/Article'
+import Promotion from './links/Promotion'
 //#endregion
 //#region theming
 const drawerWidth = 190
@@ -234,6 +235,7 @@ const apis = {
   po: 'position',
   pi: 'purchaseInvoice',
   pr: 'product',
+  pn: 'promotion',
   re: 'report',
   sl: 'slide',
   sp: 'spec',
@@ -370,6 +372,8 @@ function App() {
     'specsvaluemod/:pro/:id/:parId/:name': [null, <SpecsValueMod api={apis.sm} />],
     products: [<QrCode />, <Models models={config.text.products} api={apis.pr} pro={true} />],
     'product/:pro/:id/': [null, <Product api={apis.pr} dataFrom={[apis.ct, apis.tp, apis.br, apis.li, apis.ml, apis.wr, apis.sp]} />],
+    promotions: [<TextRotationAngleup />, <Models models={config.text.promotions} api={apis.pn} pro={true} />],
+    'promotion/:pro/:id/': [null, <Promotion api={apis.pn} addapi={apis.pr} dataFrom={[]} />],
     warranties: [<CheckBox />, <Models models={config.text.warranties} api={apis.wr} pro={true} />],
     'warranty/:pro/:id': [null, <Warranty api={apis.wr} />],
     currencies: [<CurrencyExchange />, <Models models={config.text.currencies} api={apis.cr} pro={true} />],
