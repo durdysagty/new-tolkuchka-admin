@@ -1,6 +1,6 @@
 change config
 
-"apibase": "https://new.tolkuchka.bar/",
-"en.apibase": "https://en.new.tolkuchka.bar/",
-"tm.apibase": "https://tm.new.tolkuchka.bar/",
+"apibase": "https://tolkuchka.bar/",
+"en.apibase": "https://en.tolkuchka.bar/",
+"tm.apibase": "https://tm.tolkuchka.bar/",
 "domain": ".tolkuchka.bar",
