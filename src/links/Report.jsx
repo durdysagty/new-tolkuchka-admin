@@ -8,8 +8,8 @@ import Models from '../shared/Models'
 import { Autorenew } from '@mui/icons-material'
 
 const date = new Date()
-const startDate = `${date.getFullYear()}-${date.getMonth() + 1}-01`
-const endDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`
+const startDate = `${date.getFullYear()}-${date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}-01`
+const endDate = `${date.getFullYear()}-${date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}-${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`
 
 export default function Report(props) {
 
@@ -42,6 +42,9 @@ export default function Report(props) {
                     setProfitability((val.profit / val.income * 100).toFixed(2))
                 }
             }
+            else if (result.status === 403) {
+                setReportOrders(403)
+            }
             else
                 setSubmitError(config.text.wrong)
         }
@@ -59,80 +62,82 @@ export default function Report(props) {
 
     return (reportOrders === null ?
         <Progress /> :
-        <Box>
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={3}>
-                    <PageHeader text={config.text.report} />
+        reportOrders === 403 ?
+            <Typography>{config.text.s403}</Typography> :
+            <Box>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={3}>
+                        <PageHeader text={config.text.report} />
+                    </Grid>
+                    <Grid item xs={6} md={3} display='flex'>
+                        <Typography component='span' variant='h6' mr={2}>c</Typography>
+                        <TextField type='date' sx={{ margin: 0 }} value={start} onChange={e => setStart(e.target.value)} />
+                    </Grid>
+                    <Grid item xs={6} md={3} display='flex'>
+                        <Typography component='span' variant='h6' mr={2}>по</Typography>
+                        <TextField type='date' sx={{ margin: 0 }} value={end} onChange={e => setEnd(e.target.value)} />
+                    </Grid>
+                    <Grid item xs={6} md={3} display='flex'>
+                        <Autorenew onClick={submit} sx={{ cursor: 'pointer' }} />
+                    </Grid>
                 </Grid>
-                <Grid item xs={6} md={3} display='flex'>
-                    <Typography component='span' variant='h6' mr={2}>c</Typography>
-                    <TextField type='date' sx={{ margin: 0 }} value={start} onChange={e => setStart(e.target.value)} />
-                </Grid>
-                <Grid item xs={6} md={3} display='flex'>
-                    <Typography component='span' variant='h6' mr={2}>по</Typography>
-                    <TextField type='date' sx={{ margin: 0 }} value={end} onChange={e => setEnd(e.target.value)} />
-                </Grid>
-                <Grid item xs={6} md={3} display='flex'>
-                    <Autorenew onClick={submit} sx={{ cursor: 'pointer' }} />
-                </Grid>
-            </Grid>
-            <FormHelperText error>{submitError}</FormHelperText>
-            <Models list={reportOrders} />
-            <Table>
-                <TableBody>
-                    <TableRow>
-                        <TableCell align='right'>
-                            <Typography variant='h6'>
-                                Прибыль за период:
-                            </Typography>
-                        </TableCell>
-                        <TableCell align='right'>
-                            <Typography variant='h5'>
-                                {profit}
-                            </Typography>
-                        </TableCell>
-                        <TableCell>
-                            <Typography variant='h5'>
-                                USD
-                            </Typography>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell align='right'>
-                            <Typography variant='h6'>
-                                Оборот за период:
-                            </Typography>
-                        </TableCell>
-                        <TableCell align='right'>
-                            <Typography variant='h5'>
-                                {income}
-                            </Typography>
-                        </TableCell>
-                        <TableCell>
-                            <Typography variant='h5'>
-                                USD
-                            </Typography>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell align='right'>
-                            <Typography variant='h6'>
-                                Рентабельность:
-                            </Typography>
-                        </TableCell>
-                        <TableCell align='right'>
-                            <Typography variant='h5'>
-                                {profitability}
-                            </Typography>
-                        </TableCell>
-                        <TableCell>
-                            <Typography variant='h5'>
-                                %
-                            </Typography>
-                        </TableCell>
-                    </TableRow>
-                </TableBody>
-            </Table>
-        </Box>
+                <FormHelperText error>{submitError}</FormHelperText>
+                <Models list={reportOrders} />
+                <Table>
+                    <TableBody>
+                        <TableRow>
+                            <TableCell align='right'>
+                                <Typography variant='h6'>
+                                    Прибыль за период:
+                                </Typography>
+                            </TableCell>
+                            <TableCell align='right'>
+                                <Typography variant='h5'>
+                                    {profit}
+                                </Typography>
+                            </TableCell>
+                            <TableCell>
+                                <Typography variant='h5'>
+                                    USD
+                                </Typography>
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell align='right'>
+                                <Typography variant='h6'>
+                                    Оборот за период:
+                                </Typography>
+                            </TableCell>
+                            <TableCell align='right'>
+                                <Typography variant='h5'>
+                                    {income}
+                                </Typography>
+                            </TableCell>
+                            <TableCell>
+                                <Typography variant='h5'>
+                                    USD
+                                </Typography>
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell align='right'>
+                                <Typography variant='h6'>
+                                    Рентабельность:
+                                </Typography>
+                            </TableCell>
+                            <TableCell align='right'>
+                                <Typography variant='h5'>
+                                    {profitability}
+                                </Typography>
+                            </TableCell>
+                            <TableCell>
+                                <Typography variant='h5'>
+                                    %
+                                </Typography>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </Box>
     )
 }

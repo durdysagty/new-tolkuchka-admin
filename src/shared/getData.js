@@ -26,6 +26,11 @@ export async function getData(api, lang = null, optional = null) {
         globalLogout()
         window.location.href = '/'
     }
+    else if (response.status === 403) {
+        return {
+            status: 403
+        }
+    }
     else {
         return {
             ok: false
@@ -52,6 +57,11 @@ export async function getEditModel(api, id = '') {
         else if (response.status === 401) {
             globalLogout()
             window.location.href = '/'
+        }
+        else if (response.status === 403) {
+            return {
+                status: 403
+            }
         }
         else {
             return {

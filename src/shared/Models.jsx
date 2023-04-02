@@ -45,6 +45,9 @@ export default function Models(props) {
                 if (result.data.models.length > 0)
                     prepareKeys(Object.keys(result.data.models[0]))
             }
+            else if (result.status === 403) {
+                setItems(403)
+            }
             else
                 setError(config.text.wrong)
         }
@@ -54,7 +57,7 @@ export default function Models(props) {
             setKeys(newKeys)
         }
         function setModels() {
-            const modelsList = items.models.length === 0 ?
+            const modelsList = items === 403 ? <Typography>{config.text.s403}</Typography> : items.models.length === 0 ?
                 <Typography>{config.text.noObject}</Typography> :
                 props.api === 'category' ?
                     (<Table size='small'>
@@ -205,8 +208,11 @@ export default function Models(props) {
                         setErrorReason(config.text.notDeleted)
                     setToDelete(null)
                 }
+                else if (response.status === 403) {
+                    setErrorReason(config.text.sa403)
+                }
                 else {
-                    setError(config.text.wrong)
+                    setErrorReason(config.text.wrong)
                 }
             }
             catch {
@@ -260,7 +266,7 @@ export default function Models(props) {
     return (table === null || (items !== null && api !== props.api) ?
         <Progress /> :
         <Box>
-            {props.list !== undefined ? null :
+            {props.list !== undefined || items === 403 ? null :
                 <Grid container justifyContent='space-between' alignItems='center' >
                     <Grid item xs='auto'>
                         {pageHeader}

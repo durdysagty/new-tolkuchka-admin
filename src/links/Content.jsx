@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import config from '../configs/config.json'
 import PageHeader from '../shared/PageHeader'
-import { Box, FormHelperText, InputLabel } from '@mui/material'
+import { Box, FormHelperText, InputLabel, Typography } from '@mui/material'
 import SubmitButton from '../shared/SubmitButton'
 import { CKEditor } from 'ckeditor4-react'
 import { getEditModel } from '../shared/getData'
@@ -36,6 +36,9 @@ export default function Content(props) {
             const result = await getEditModel(`${props.api}/edit`)
             if (result.ok)
                 setContent(result.data)
+            else if (result.status === 403) {
+                setContent(403)
+            }
             else
                 setSubmitError(config.text.wrong)
         }
@@ -66,18 +69,20 @@ export default function Content(props) {
 
     return (content.aboutRu === '' || process ?
         <Progress /> :
-        <Box>
-            <PageHeader id={0} api={props.api} />
-            <Box component='form' onSubmit={submit} margin='auto'>
-                {keys.map((text, i) => (
-                    <Box key={i} mb={4}>
-                        <FormHelperText error>{submitError}</FormHelperText>
-                        <InputLabel>{config.text[text]}</InputLabel>
-                        <CKEditor name={text} initData={content[text]} onChange={getData} />
-                    </Box>
-                ))}
-                <SubmitButton pro={'edit'} />
+        content === 403 ?
+            <Typography>{config.text.s403}</Typography> :
+            <Box>
+                <PageHeader id={0} api={props.api} />
+                <Box component='form' onSubmit={submit} margin='auto'>
+                    {keys.map((text, i) => (
+                        <Box key={i} mb={4}>
+                            <FormHelperText error>{submitError}</FormHelperText>
+                            <InputLabel>{config.text[text]}</InputLabel>
+                            <CKEditor name={text} initData={content[text]} onChange={getData} />
+                        </Box>
+                    ))}
+                    <SubmitButton pro={'edit'} />
+                </Box>
             </Box>
-        </Box>
     )
 }
