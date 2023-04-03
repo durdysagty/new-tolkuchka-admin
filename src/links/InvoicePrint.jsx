@@ -17,7 +17,7 @@ const x = {
     phone: ''
 }
 const keys = Object.keys(x)
-const orderKeys = ['productId', 'name', 'serialNumbers', 'orderPrice', 'quantity', 'sum']
+const orderKeys = ['productId', 'name', 'serialNumbers', 'warranty', 'orderPrice', 'quantity', 'sum']
 
 export default function InvoicePrint(props) {
     //#region states
@@ -72,6 +72,9 @@ export default function InvoicePrint(props) {
             <Box id='invoice' margin='auto'>
                 <FormHelperText error>{submitError}</FormHelperText>
                 <Box p={4}>
+                    <Box textAlign='center'>
+                        <img src={`${config.apibase}logo.png`} alt='logo' />
+                    </Box>
                     <Typography variant='h4'>{`${config.text[`${invoice.language}.invoice`]} #${id}`}</Typography>
                     <Box my={2}>
                         {keys.map((text, i) => <Grid container key={i} sx={{ display: 'flex' }}>
@@ -93,7 +96,7 @@ export default function InvoicePrint(props) {
                                             <TableCell sx={{ border: '1px solid black' }}>
                                                 {i + 1}
                                             </TableCell>
-                                            {orderKeys.slice(1, 5).map((k, i) => <TableCell key={i} sx={{ border: '1px solid black' }}>
+                                            {orderKeys.slice(1, 6).map((k, i) => <TableCell key={i} sx={{ border: '1px solid black' }}>
                                                 {o[k]}
                                             </TableCell>)}
                                             <TableCell sx={{ border: '1px solid black' }}>
@@ -103,18 +106,46 @@ export default function InvoicePrint(props) {
                                     })}
                                     <TableRow>
                                         <TableCell colSpan={4} sx={{ border: '1px solid black' }}></TableCell>
-                                        <TableCell sx={{ border: '1px solid black' }}><strong>{config.text[`${invoice.language}.deliveryCost`]}</strong></TableCell>
+                                        <TableCell colSpan={2} sx={{ border: '1px solid black' }}><strong>{config.text[`${invoice.language}.deliveryCost`]}</strong></TableCell>
                                         <TableCell sx={{ border: '1px solid black' }}>{invoice.deliveryCost}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell colSpan={4} sx={{ border: '1px solid black' }}></TableCell>
-                                        <TableCell sx={{ fontSize: 20, border: '1px solid black' }}><strong>{config.text[`${invoice.language}.amount`]}</strong></TableCell>
+                                        <TableCell colSpan={2} sx={{ fontSize: 20, border: '1px solid black' }}><strong>{config.text[`${invoice.language}.amount`]}</strong></TableCell>
                                         <TableCell sx={{ fontSize: 20, border: '1px solid black' }}>{amount + invoice.deliveryCost}</TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table> :
                             null
                         }
+                        <Box pt={3}>
+                            <Typography variant='h5' textAlign='center'>{config.text[`${invoice.language}.wt`]}</Typography>
+                            <Typography textAlign='justify' sx={{ fontWeight: 'bold' }}>{config.text[`${invoice.language}.wLine`]}.</Typography>
+                            <Typography textAlign='justify'>{config.text[`${invoice.language}.wProvide`]}.</Typography>
+                            <Typography textAlign='justify' ml={2}>{config.text[`${invoice.language}.wCond`]}:</Typography>
+                            <Box ml={3}>
+                                <Typography textAlign='justify'>{config.text[`${invoice.language}.wSeal`]};</Typography>
+                                <Typography textAlign='justify'>{config.text[`${invoice.language}.wSticker`]}.</Typography>
+                            </Box>
+                            <Typography textAlign='justify' ml={2}>{config.text[`${invoice.language}.wDefect`]}:</Typography>
+                            <Box ml={3}>
+                                <Typography textAlign='justify'>{config.text[`${invoice.language}.wNonobs`]};</Typography>
+                                <Typography textAlign='justify'>{config.text[`${invoice.language}.wDamage`]};</Typography>
+                                <Typography textAlign='justify'>{config.text[`${invoice.language}.wOver`]};</Typography>
+                                <Typography textAlign='justify'>{config.text[`${invoice.language}.wRepair`]};</Typography>
+                                <Typography textAlign='justify'>{config.text[`${invoice.language}.wResulting`]};</Typography>
+                                <Typography textAlign='justify'>{config.text[`${invoice.language}.wChange`]}.</Typography>
+                            </Box>
+                            <Typography textAlign='justify' ml={2}>{config.text[`${invoice.language}.wNotCover`]}:</Typography>
+                            <Box ml={3}>
+                                <Typography textAlign='justify'>{config.text[`${invoice.language}.wPackaging`]};</Typography>
+                                <Typography textAlign='justify'>{config.text[`${invoice.language}.wWear`]};</Typography>
+                                <Typography textAlign='justify'>{config.text[`${invoice.language}.wCause`]}.</Typography>
+                            </Box>
+                            <Typography textAlign='justify'>{config.text[`${invoice.language}.wNotinc`]}.</Typography>
+                            <Typography textAlign='justify'>{config.text[`${invoice.language}.wLoss`]}.</Typography>
+                            <Typography textAlign='justify'>{config.text[`${invoice.language}.wReserve`]}.</Typography>
+                        </Box>
                     </Box>
                 </Box>
             </Box>
