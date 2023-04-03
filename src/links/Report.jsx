@@ -82,7 +82,7 @@ export default function Report(props) {
                     </Grid>
                 </Grid>
                 <FormHelperText error>{submitError}</FormHelperText>
-                <Models list={reportOrders} />
+                <Models list={reportOrders} noCheckBox={true} />
                 <Table>
                     <TableBody>
                         <TableRow>
