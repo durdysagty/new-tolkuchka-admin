@@ -26,7 +26,7 @@ export default function InvoicePrint(props) {
     const [orders, setOrders] = useState(null)
     const [once, setOnce] = useState('0')
     const [amount, setAmount] = useState(0)
-    const [process, setProcess] = useState(false)
+    const [process] = useState(false)
     //#endregion
     useEffect(() => {
         if (once !== 1)
@@ -57,13 +57,13 @@ export default function InvoicePrint(props) {
     const [submitError, setSubmitError] = useState('')
     async function submit(e) {
         e.preventDefault()
-        setProcess(true)
+        // setProcess(true)
         await wait(0)
         const print = document.getElementById('invoice')
         document.getElementById('root').innerHTML = print.innerHTML
         window.print()
         window.location.href = '/invoices'
-        setProcess(false)
+        // setProcess(false)
     }
     return (orders === null || process ?
         <Progress /> :
