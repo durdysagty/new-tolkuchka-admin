@@ -31,6 +31,7 @@ export default function PurchaseInvoice(props) {
     const [currencies, setCurrencies] = useState(null)
     const [suppliers, setSuppliers] = useState(null)
     const [purchases, setPurchases] = useState([])
+    const [nullChecked, setNullChecked] = useState(false)
     const [once, setOnce] = useState('0')
     const [process, setProcess] = useState(false)
 
@@ -154,11 +155,17 @@ export default function PurchaseInvoice(props) {
     async function submit(e) {
         e.preventDefault()
         setProcess(true)
+        const nullPurchase = purchases.find(p => p.purchasePrice === 0)
+        if (nullPurchase !== undefined && !nullChecked) {
+            setSubmitError(config.text.nullPurchase)
+            setNullChecked(true)
+            setProcess(false)
+            return
+        }
         await wait(0)
-        // console.log(purchases)
-        // console.log(purchaseInvoice)
         if (purchases.length < 1) {
             setSubmitError(config.text.noPurchase)
+            setProcess(false)
             return
         }
         let i = id
@@ -184,8 +191,8 @@ export default function PurchaseInvoice(props) {
             <PageHeader id={id} pro={pro} api={props.api} />
             <Box component='form' onSubmit={submit} onInvalid={invalid} margin='auto' mb={1} >
                 <FormHelperText error>{submitError}</FormHelperText>
-                <AccordionList list={currencies} name={keys[0]} handleChange={handleChange} accId='currency' dtlId='currencies' req={true} error={error} validation={validation[keys[0]]} id={id !== '0' ? purchaseInvoice.currencyId : undefined} />
-                <AccordionList list={suppliers} name={keys[1]} handleChange={handleChange} accId='supplier' dtlId='suppliers' req={true} error={error} validation={validation[keys[1]]} id={id !== '0' ? purchaseInvoice.supplierId : undefined} />
+                <AccordionList list={currencies} name={keys[0]} handleChange={handleChange} accId='currency' dtlId='currencies' req={true} error={error} validation={validation[keys[0]]} id={id !== '0' || purchaseInvoice.currencyId !== '' ? purchaseInvoice.currencyId : undefined} />
+                <AccordionList list={suppliers} name={keys[1]} handleChange={handleChange} accId='supplier' dtlId='suppliers' req={true} error={error} validation={validation[keys[1]]} id={id !== '0' || purchaseInvoice.supplierId !== '' ? purchaseInvoice.supplierId : undefined} />
                 <InputLabel>{config.text.products}</InputLabel>
                 <Box mb={5}>
                     {purchases.length > 0 ?

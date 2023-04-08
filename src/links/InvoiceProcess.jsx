@@ -109,7 +109,7 @@ export default function InvoiceProcess(props) {
             const order = array.find(o => o.purchaseId === id)
             order.purchaseId = null
             const p = pairs.find(x => x[1] === id)
-            p[1] = null
+            p[1] = ''
         }
         setOrders(array)
         const isFilled = orders.every(o => o.purchaseId !== null)
@@ -131,8 +131,6 @@ export default function InvoiceProcess(props) {
         e.preventDefault()
         setProcess(true)
         await wait(0)
-        // console.log(orders)
-        // console.log(invoice)
         const response = await setFormData(`${props.api}/store/${id}`, id, null, null, {
             orderPurchases: pairs,
             isDelivered: invoiceState.isDelivered,

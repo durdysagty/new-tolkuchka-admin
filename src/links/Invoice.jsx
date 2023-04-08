@@ -164,8 +164,6 @@ export default function Invoice(props) {
         e.preventDefault()
         setProcess(true)
         await wait(0)
-        // console.log(orders)
-        // console.log(invoice)
         if (orders.length < 1) {
             setSubmitError(config.text.noPurchase)
             setProcess(false)
@@ -185,7 +183,7 @@ export default function Invoice(props) {
             if (response.result === r.success)
                 navigate(-1)
             else
-                setSubmitError(config.text.bindedOrder)
+                setSubmitError(config.text.deliveredInvoice)
         }
         else
             setSubmitError(config.text.wrong)
