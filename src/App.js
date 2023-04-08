@@ -4,7 +4,7 @@ import config from './configs/config.json'
 import { globalLogout } from './shared/globalFunctions'
 import { BrowserRouter, Link as RouterLink, Route, Routes } from 'react-router-dom'
 import { AppBar, Box, Button, createTheme, CssBaseline, FormHelperText, styled, TextField, ThemeProvider, Drawer, Toolbar, IconButton, List, ListItemButton, Divider, ListItemIcon, ListItemText, Link } from '@mui/material'
-import { AltRoute, Assessment, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPaste, CurrencyExchange, DesignServices, EventSeat, Home, Label, Logout, Menu, QrCode, Receipt, ReceiptLong, Source, Store, TextRotationAngleup, TextSnippet } from '@mui/icons-material'
+import { AltRoute, Assessment, Assignment, Badge, BurstMode, CategorySharp, CheckBox, ChevronLeft, ChevronRight, Class, ContentPaste, CurrencyExchange, DesignServices, EventSeat, Home, Label, Logout, Menu, People, QrCode, Receipt, ReceiptLong, Source, Store, TextRotationAngleup, TextSnippet } from '@mui/icons-material'
 import Employee from './links/Employee'
 import Progress from './shared/Progress'
 import Position from './links/Position'
@@ -30,6 +30,7 @@ import InvoiceProcess from './links/InvoiceProcess'
 import Report from './links/Report'
 import Article from './links/Article'
 import Promotion from './links/Promotion'
+import User from './links/User'
 //#endregion
 //#region theming
 const drawerWidth = 190
@@ -242,8 +243,9 @@ const apis = {
   su: 'supplier',
   sv: 'specsvalue',
   sm: 'specsvaluemod',
-  wr: 'warranty',
-  tp: 'type'
+  tp: 'type',
+  us: 'user',
+  wr: 'warranty'
 }
 
 function App() {
@@ -384,10 +386,12 @@ function App() {
     'supplier/:pro/:id': [null, <Supplier api={apis.su} />],
     purchaseInvoices: [<Receipt />, <Models models={config.text.purchaseInvoices} api={apis.pi} />],
     'purchaseInvoice/:pro/:id': [null, <PurchaseInvoice api={apis.pi} addapi={apis.pr} dataFrom={[apis.cr, apis.su]} />],
-    invoices: [<ReceiptLong />, <Models models={config.text.invoices} api={apis.in} api2='process' api3='print' />],
+    invoices: [<ReceiptLong />, <Models models={config.text.invoices} api={apis.in} api2='process' api3='print' notAdd={true} listKey='orders' />],
     'invoice/:pro/:id': [null, <Invoice api={apis.in} addapi={apis.pr} dataFrom={[apis.cr]} />],
     'process/invoice/:id': [null, <InvoiceProcess api={apis.in} dataFrom={[apis.pi]} />],
     'print/invoice/:id': [null, <InvoicePrint api={apis.in} />],
+    users: [<People />, <Models models={config.text.users} api={apis.us} notAdd={true} notEditable={true} watchable={true} />],
+    'user/:id': [null, <User api={apis.us} dataFrom={[apis.in]} />],
     employees: [<Badge />, <Models models={config.text.employees} api={apis.em} />],
     'employee/:pro/:id': [null, <Employee api={apis.em} dataFrom={apis.po} />],
     positions: [<EventSeat />, <Models models={config.text.positions} api={apis.po} pro={true} />],
@@ -396,7 +400,7 @@ function App() {
     report: [<Assessment />, <Report api={apis.re} />],
     articles: [<TextSnippet />, <Models models={config.text.articles} api={apis.ar} pro={true} />],
     'article/:pro/:id': [null, <Article api={apis.ar} addapi={apis.hd} />],
-    entries: [<ContentPaste />, <Models models={config.text.entries} api={apis.en} />],
+    entries: [<ContentPaste />, <Models models={config.text.entries} api={apis.en} notAdd={true} />],
   }
 
   return (

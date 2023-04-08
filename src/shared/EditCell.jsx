@@ -1,13 +1,24 @@
-import { ContentCopy, Delete, Edit, EditAttributesSharp, Print } from "@mui/icons-material"
+import { ContentCopy, Delete, Edit, EditAttributesSharp, ListAlt, Print } from "@mui/icons-material"
 import { Box, Link } from "@mui/material"
 import { Link as RouterLink } from 'react-router-dom'
 
 export default function EditCell(props) {
     return (
         <Box>
-            <Link to={`/${props.api}/edt/${props.id}${props.parName === undefined ? '' : `/${props.parId}/${props.parName.replace('/', '-')}`}`} component={RouterLink} >
-                <Edit />
-            </Link>
+            {
+                props.watchable ?
+                    <Link to={`/${props.api}/${props.id}${props.parName === undefined ? '' : `/${props.parId}/${props.parName.replace('/', '-')}`}`} component={RouterLink} >
+                        <ListAlt />
+                    </Link> :
+                    null
+            }
+            {
+                props.notEditable ?
+                    null :
+                    <Link to={`/${props.api}/edt/${props.id}${props.parName === undefined ? '' : `/${props.parId}/${props.parName.replace('/', '-')}`}`} component={RouterLink} >
+                        <Edit />
+                    </Link>
+            }
             {
                 props.api2 === undefined ?
                     null :
@@ -29,7 +40,11 @@ export default function EditCell(props) {
                     </Link> :
                     null
             }
-            <Delete onClick={props.delete} sx={{ cursor: 'pointer', marginX: 2 }} />
+            {
+                props.notEditable ?
+                    null :
+                    <Delete onClick={props.delete} sx={{ cursor: 'pointer', marginX: 2 }} />
+            }
         </Box>
     )
 }

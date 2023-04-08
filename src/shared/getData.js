@@ -1,12 +1,15 @@
 import config from '../configs/config.json'
 import { globalLogout } from './globalFunctions'
 
-export async function getData(api, lang = null, optional = null) {
+export async function getData(api, lang = null, optional = null, search = null) {
     let query = ''
-    if (optional !== null) {
+    if (optional !== null || search !== null) {
         query = '?'
-        for (let k in optional)
-            query += `keys=${k}&values=${optional[k]}&`
+        if (search !== null)
+            query += `${search}&`
+        if (optional !== null)
+            for (let k in optional)
+                query += `keys=${k}&values=${optional[k]}&`
     }
     const response = await fetch(`${lang === null || lang === 'ru' ? config.apibase : config[`${lang}.apibase`]}${config.api}${api}${query}`, {
         method: 'GET',

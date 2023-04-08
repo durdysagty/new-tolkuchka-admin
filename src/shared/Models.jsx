@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import config from '../configs/config.json'
 import { getData } from '../shared/getData'
-import { Box, Button, Checkbox, FormHelperText, Grid, InputLabel, Table, TableBody, TableCell, TableRow, TextField, Typography } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Checkbox, FormHelperText, Grid, InputLabel, Table, TableBody, TableCell, TableRow, TextField, Typography } from '@mui/material'
 import EditCell from './EditCell'
 import TableHeader from './TableHeader'
 import PageHeader from './PageHeader'
@@ -21,6 +21,8 @@ export default function Models(props) {
     const [items, setItems] = useState(null)
     const [table, setTable] = useState(null)
     const [keys, setKeys] = useState(null)
+    const [nestedKeys, setNestedKeys] = useState([])
+    const [expanded, setExpanded] = useState(null)
     const [api, setApi] = useState('')
     const [error, setError] = useState(null)
     // const [getShortModels, setGetShortModels] = useState(false)
@@ -38,12 +40,12 @@ export default function Models(props) {
         setApi(props.api)
         async function getModels(page, search) {
             console.log('getModels')
-            const query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${parentId === undefined ? '' : `/${parentId}`}?search=${search}&page=${page}`
-            const result = await getData(query)
+            const query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${parentId === undefined ? '' : `/${parentId}`}`
+            const result = await getData(query, null, props.selectorKey !== undefined ? props.selectorKey : null, `search=${search}&page=${page}`)
             if (result.ok) {
-                setItems(result.data)
                 if (result.data.models.length > 0)
-                    prepareKeys(Object.keys(result.data.models[0]))
+                    prepareKeys(Object.keys(result.data.models[0]), props.listKey !== undefined ? Object.keys(result.data.models[0][props.listKey][0]) : null)
+                setItems(result.data)
             }
             else if (result.status === 403) {
                 setItems(403)
@@ -51,10 +53,18 @@ export default function Models(props) {
             else
                 setError(config.text.wrong)
         }
-        function prepareKeys(keys) {
-            const exceptedKeys = ['language', 'deliveryCost']
+        function prepareKeys(keys, nestedKeys) {
+            const exceptedKeys = ['language', 'deliveryCost', props.listKey]
             const newKeys = keys.filter(k => !exceptedKeys.includes(k))
             setKeys(newKeys)
+            if (nestedKeys !== null) {
+                if (props.listKey === 'orders')
+                    nestedKeys.push('amount')
+                setNestedKeys(nestedKeys)
+            }
+        }
+        function expandNested(id) {
+            expanded === id ? setExpanded(null) : setExpanded(id)
         }
         function setModels() {
             const modelsList = items === 403 ? <Typography>{config.text.s403}</Typography> : items.models.length === 0 ?
@@ -76,14 +86,14 @@ export default function Models(props) {
                     </Table>) :
                     (<Box>
                         <Table size='small'>
-                            <TableHeader data={keys.map(k => k === 'isNew' || k === 'isRecommended' || k === 'isForHome' ? config.text[`${k}Short`] : k === 'notInUse' ? config.text['isInUseShort'] : config.text[k])} action={props.api === 'entry' || props.api === undefined ? false : true} selectable={props.selectable} />
-                            <TableBody>
-                                {items.models.map(m => (
-                                    <TableRow key={m.id}>
-                                        {keys.map((k, i) => (<TableCell key={i}>{typeof (m[k]) === 'boolean' ? <Checkbox onChange={() => changeBoolenProperty(m.id, k)} checked={m[k]} checkedIcon={<CheckBox color='success' />} icon={<Close color='error' />} disabled={k === 'isPaid' || k === 'isDelivered'} /> : k.toLowerCase().includes('date') ? new Date(m[k]).toLocaleString() : !props.noCheckBox && k.includes('rice') && !k.includes('Rate') ? <Box><Checkbox checked={toChanges[k] !== undefined && toChanges[k].includes(String(m.id))} value={m.id} name={k} onChange={addToChanges} />{m[k]} </Box> : m[k]}</TableCell>))}
-                                        {props.api === 'entry' || props.api === undefined ? null :
+                            <TableHeader data={keys.map(k => k === 'isNew' || k === 'isRecommended' || k === 'isForHome' ? config.text[`${k}Short`] : k === 'notInUse' ? config.text['isInUseShort'] : config.text[k])} action={props.api === 'entry' || props.api === undefined || (props.notEditable && !props.watchable && !props.selectable) ? false : true} selectable={props.selectable} />
+                            {items.models.map((m, i) => (
+                                <TableBody key={i}>
+                                    <TableRow sx={{ cursor: props.listKey !== undefined ? 'pointer' : 'initial' }} onClick={props.listKey !== undefined ? () => expandNested(m.id) : undefined} >
+                                        {keys.map((k, i) => (<TableCell key={i}>{typeof (m[k]) === 'boolean' ? <Checkbox onChange={props.notEditable ? null : () => changeBoolenProperty(m.id, k)} checked={m[k]} checkedIcon={<CheckBox color='success' />} icon={<Close color='error' />} disabled={k === 'isPaid' || k === 'isDelivered'} /> : k.toLowerCase().includes('date') ? new Date(m[k]).toLocaleString() : !props.noCheckBox && k.includes('rice') && !k.includes('Rate') ? <Box><Checkbox checked={toChanges[k] !== undefined && toChanges[k].includes(String(m.id))} value={m.id} name={k} onChange={e => addToChanges(e)} />{m[k]}</Box> : m[k]}</TableCell>))}
+                                        {props.api === 'entry' || props.api === undefined || (props.notEditable && !props.watchable) ? null :
                                             <TableCell>
-                                                <EditCell api={props.api} id={m.id} api2={props.api2} api3={props.api3} parId={parentId} parName={name} name={m.name} delete={() => prepareDelete(m.id)} pro={props.pro} />
+                                                <EditCell notEditable={props.notEditable} watchable={props.watchable} api={props.api} id={m.id} api2={props.api2} api3={props.api3} parId={parentId} parName={name} name={m.name} delete={() => prepareDelete(m.id)} pro={props.pro} />
                                             </TableCell>
                                         }
                                         {props.selectable ?
@@ -93,8 +103,40 @@ export default function Models(props) {
                                             null
                                         }
                                     </TableRow>
-                                ))}
-                            </TableBody>
+                                    {props.listKey !== undefined ?
+                                        <TableRow sx={{ visibility: expanded === m.id ? 'visible' : 'collapse' }}>
+                                            <TableCell colSpan={props.notEditable ? keys.length : keys.length + 1}>
+                                                <Accordion expanded={expanded === m.id}>
+                                                    <AccordionSummary></AccordionSummary>
+                                                    <AccordionDetails>
+                                                        <Table size='small'>
+                                                            <TableHeader data={nestedKeys.map(k => config.text[k])} />
+                                                            <TableBody>
+                                                                {m[props.listKey] !== undefined ? m[props.listKey].map((m, i) => (
+                                                                    <TableRow key={i}>
+                                                                        {nestedKeys.map((k, i) => (k === 'amount' ?
+                                                                            <TableCell key={i}>{m['orderPrice'] * m['quantity']}</TableCell>
+                                                                            : <TableCell key={i}>{k.toLowerCase().includes('date') ? new Date(m[k]).toLocaleString() : m[k]}</TableCell>))}
+                                                                    </TableRow>)) :
+                                                                    null}
+                                                                {props.listKey === 'orders' ?
+                                                                    <TableRow>
+                                                                        <TableCell colSpan={nestedKeys.length - 1} sx={{ textAlign: 'right' }}  >
+                                                                            {config.text.deliveryCost}
+                                                                        </TableCell>
+                                                                        <TableCell>{m['deliveryCost']}</TableCell>
+                                                                    </TableRow> :
+                                                                    null
+                                                                }
+                                                            </TableBody>
+                                                        </Table>
+                                                    </AccordionDetails>
+                                                </Accordion>
+                                            </TableCell>
+                                        </TableRow> :
+                                        null
+                                    }
+                                </TableBody>))}
                         </Table>
                         {items.pagination !== null ?
                             <Box display='flex' alignItems='center' justifyContent='end'>
@@ -162,7 +204,7 @@ export default function Models(props) {
         else {
             if (items === null) {
                 if (props.list.models.length > 0)
-                    prepareKeys(Object.keys(props.list.models[0]))
+                    prepareKeys(Object.keys(props.list.models[0]), props.listKey !== undefined ? Object.keys(props.list.models[0][props.listKey][0]) : null)
                 setItems(props.list)
             }
         }
@@ -171,7 +213,7 @@ export default function Models(props) {
             setModels()
         }
         // console.log('effect')
-    }, [props, keys, name, items, api, parentId, page, search, toChanges, toSearch, searchTimeOut])
+    }, [props, keys, nestedKeys, name, items, api, parentId, page, search, toChanges, toSearch, searchTimeOut, expanded])
     // #region functions
     const [toDelete, setToDelete] = useState(null)
 
@@ -261,7 +303,7 @@ export default function Models(props) {
     }
     //#endregion
 
-    const pageHeader = props.list !== undefined ? null : props.selectable ? props.listName !== undefined ? <InputLabel>{props.listName}</InputLabel> : <InputLabel>Список</InputLabel> : <PageHeader models={props.models} name={name} path={props.api === 'invoice' || props.api === 'entry' ? undefined : `/${props.api}/scr/0${props.addapi === undefined ? '' : `/${parentId}/${name}`}`} />
+    const pageHeader = props.list !== undefined ? null : props.selectable ? props.listName !== undefined ? <InputLabel>{props.listName}</InputLabel> : <InputLabel>Список</InputLabel> : <PageHeader models={props.models} name={name} path={props.notAdd ? undefined : `/${props.api}/scr/0${props.addapi === undefined ? '' : `/${parentId}/${name}`}`} />
 
     return (table === null || (items !== null && api !== props.api) ?
         <Progress /> :
