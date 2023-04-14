@@ -323,6 +323,7 @@
         "brand": "180x60",
         "category": "450x225 (необходимо, если \"На домашней\")",
         "product": "600x600",
+        "promotion": "450x225",
         "slide": "600x300",
         "slideleft": "220x300",
         "specsValue": "25x25"

@@ -230,11 +230,11 @@ export default function Promotion(props) {
                     <TextField key={i} type='text' label={config.text[text]} name={text} onChange={handleChange} value={promotion[text]} multiline />
                 ))}
                 <InputLabel error={error && (validation.imageru !== '' && validation.imageru !== undefined)}>{config.text.ruVer}</InputLabel>
-                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imageru' validation={validation} required={pro === 'sim' && (imageen !== null || imagetm !== null)} image={promotion.layout === '1' ? 'slideleft' : 'slide'} />
+                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imageru' validation={validation} required={pro === 'sim' && (imageen !== null || imagetm !== null)} image='promotion' />
                 <InputLabel error={error && (validation.imageen !== '' && validation.imageen !== undefined)}>{config.text.enVer}</InputLabel>
-                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imageen' validation={validation} required={pro === 'sim' && (imageru !== null || imagetm !== null)} image={promotion.layout === '1' ? 'slideleft' : 'slide'} />
+                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imageen' validation={validation} required={pro === 'sim' && (imageru !== null || imagetm !== null)} image='promotion' />
                 <InputLabel error={error && (validation.imagetm !== '' && validation.imagetm !== undefined)}>{config.text.tmVer}</InputLabel>
-                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imagetm' validation={validation} required={pro === 'sim' && (imageru !== null || imageen !== null)} image={promotion.layout === '1' ? 'slideleft' : 'slide'} />
+                <ImageUpload handleChange={handleChange} id={id} error={error} imageName='imagetm' validation={validation} required={pro === 'sim' && (imageru !== null || imageen !== null)} image='promotion' />
                 <Grid container sx={{ display: 'flex' }}>
                     <Grid item xs={5} sm={2} lg={1}>
                         <InputLabel>{config.text.notInUse}</InputLabel>
