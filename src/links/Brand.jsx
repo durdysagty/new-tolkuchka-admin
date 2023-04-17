@@ -15,7 +15,7 @@ import { wait } from '@testing-library/user-event/dist/utils'
 
 const x = {
     name: '',
-    isForHome: ''
+    isForHome: false
 }
 const keys = Object.keys(x)
 

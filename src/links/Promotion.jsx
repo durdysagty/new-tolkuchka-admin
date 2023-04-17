@@ -128,7 +128,6 @@ export default function Promotion(props) {
             ...prevState,
             [e.target.name]: ''
         }))
-        console.log(promotion)
     }
 
     function handleSubject(o, e) {
