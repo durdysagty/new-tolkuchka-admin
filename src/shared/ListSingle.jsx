@@ -14,6 +14,7 @@ export default function ListSingle(props) {
     //const [newList, setNewList] = useState(null)
 
     useEffect(() => {
+        setIds(props.checkList)
         function selectList(list) {
             console.log(`listSingleAddable`)
             return list.map(l => {
@@ -37,7 +38,6 @@ export default function ListSingle(props) {
             })
         }
         function handleCheck(e) {
-            console.log(deletedIds)
             const array = ids.slice()
             if (e.target.checked)
                 array.push(parseInt(e.target.value))

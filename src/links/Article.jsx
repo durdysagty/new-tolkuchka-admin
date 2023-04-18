@@ -81,6 +81,7 @@ export default function Article(props) {
             newHeading.language = language
         }
         if (language !== null && langChanged) {
+            setSelectedHeadingIds([])
             additionalData()
         }
     }, [once, props.api, props.addapi, article.name, language, langChanged, headings, id, selectedHeadingIds, deletedHeadingIds, process])
@@ -184,9 +185,6 @@ export default function Article(props) {
         if (selectedHeadingIds.length === 0 && newHeadings.length === 0) {
             setSubmitError(config.text.noHeading)
             return
-        }
-        for (let i = 0; i < newHeadings.length; i++) {
-            newHeadings[i].language = language
         }
         setProcess(true)
         await wait(0)
