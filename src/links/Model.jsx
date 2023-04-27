@@ -72,7 +72,7 @@ export default function Model(props) {
                 setCategories(result.data)
             else
                 setError(config.text.wrong)
-            result = await getData(props.dataFrom[1])
+            result = await getData(props.dataFrom[1], null, null, "pp=1000")
             if (result.ok)
                 setTypes(result.data.models)
             else
@@ -87,7 +87,7 @@ export default function Model(props) {
                 setWarranties(result.data.models)
             else
                 setError(config.text.wrong)
-            result = await getData(props.dataFrom[5])
+            result = await getData(props.dataFrom[5], null, null, "pp=1000")
             if (result.ok)
                 setSpecs(result.data.models)
             else
