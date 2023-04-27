@@ -40,8 +40,9 @@ export default function Models(props) {
         setApi(props.api)
         async function getModels(page, search) {
             console.log('getModels')
-            const query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${parentId === undefined ? '' : `/${parentId}`}`
-            const result = await getData(query, null, props.selectorKey !== undefined ? props.selectorKey : null, `search=${search}&page=${page}`)
+            // const query = `${props.api}${props.addapi === undefined ? '' : `/${props.addapi}`}${parentId === undefined ? '' : `/${parentId}`}`
+            // selectorKey used in User model
+            const result = await getData(props.api, null, props.addapi !== undefined ? { [props.addapi]: parentId } : props.selectorKey !== undefined ? props.selectorKey : null, `search=${search}&page=${page}`)
             if (result.ok) {
                 if (result.data.models.length > 0)
                     prepareKeys(Object.keys(result.data.models[0]), props.listKey !== undefined ? Object.keys(result.data.models[0][props.listKey][0]) : null)
