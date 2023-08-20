@@ -1,4 +1,4 @@
-import config from '../configs/config.json'
+// import config from '../configs/config.json'
 import { r } from './Result'
 
 // api - the route
@@ -43,7 +43,7 @@ export async function setFormData(api, id, data, images = null, optional = null)
                     formData.append('images', new File([], 'delete'))
                 else
                     formData.append('images', i)
-        const response = await fetch(`${config.apibase}${config.api}${api}`, {
+        const response = await fetch(`${process.env.REACT_APP_API_BASE}${process.env.REACT_APP_API}${api}`, {
             method: id === '0' ? 'POST' : 'PUT',
             credentials: 'include',
             headers: {
@@ -81,7 +81,7 @@ export async function setJsonData(api, id, data) {
         if (data[key] === '')
             data[key] = null
     try {
-        const response = await fetch(`${config.apibase}${config.api}${api}`, {
+        const response = await fetch(`${process.env.REACT_APP_API_BASE}${process.env.REACT_APP_API}${api}`, {
             method: id === '0' ? 'POST' : 'PUT',
             credentials: 'include',
             headers: {

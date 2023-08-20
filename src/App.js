@@ -253,7 +253,7 @@ function App() {
   const loginResult = { success: 0, fail: 1 }
   function setCredentials(loginResponse) {
     document.cookie = 'user={}; max-age=604800; samesite=strict; secure'
-    document.cookie = `hce=${loginResponse.text}; domain=${config.domain}; max-age=604800; samesite=none; secure`
+    document.cookie = `hce=${loginResponse.text}; domain=${process.env.REACT_APP_DOMAIN}; max-age=604800; samesite=none; secure`
     localStorage.setItem('MIT', loginResponse.data)
     setAuthState(true)
   }
@@ -296,7 +296,7 @@ function App() {
       password: password
     }
     try {
-      const response = await fetch(`${config.apibase}${apis.ln}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE}${apis.ln}`, {
         method: 'POST',
         credentials: 'include',
         headers: {

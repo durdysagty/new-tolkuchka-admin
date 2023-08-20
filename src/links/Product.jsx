@@ -53,7 +53,7 @@ export default function Product(props) {
     const [getSpecs, setGetSpecs] = useState(false)
     const [getAdditional, setGetAdditional] = useState(false)
     const [once, setOnce] = useState(0)
-    const [process, setProcess] = useState(false)
+    const [processing, setProcessing] = useState(false)
     //#endregion
     useEffect(() => {
         if (once !== 1)
@@ -118,7 +118,7 @@ export default function Product(props) {
                     setModels(result.data.models)
                 else
                     setError(config.text.wrong)
-                console.log(result.data.models)
+                // console.log(result.data.models)
             }
             if (getSpecs || getAdditional) {
                 setGetSpecs(false)
@@ -134,7 +134,7 @@ export default function Product(props) {
             prepareData()
         if (product.brandId !== '' && once === 1)
             additionalData()
-    }, [once, props.api, props.dataFrom, id, product, brands, getLines, getModels, getSpecs, getAdditional, process])
+    }, [once, props.api, props.dataFrom, id, product, brands, getLines, getModels, getSpecs, getAdditional, processing])
     // #region functions
     function handleChange(e, i) {
         if (e.target.name === undefined && id !== '0') {
@@ -281,11 +281,11 @@ export default function Product(props) {
     //#endregion
     async function submit(e) {
         e.preventDefault()
-        setProcess(true)
+        setProcessing(true)
         await wait(0)
         if (specs.length > productSpecsValues.length) {
             setSubmitError(config.text.notAllSpecs)
-            setProcess(false)
+            setProcessing(false)
             return
         }
         let i = id
@@ -323,10 +323,10 @@ export default function Product(props) {
             }
         else
             setSubmitError(config.text.wrong)
-        setProcess(false)
+        setProcessing(false)
     }
 
-    return ((id !== '0' && product.brandId === '') || brands === null || process ?
+    return ((id !== '0' && product.brandId === '') || brands === null || processing ?
         <Progress /> :
         <Box>
             <PageHeader id={id} pro={pro} api={props.api} />
@@ -390,7 +390,7 @@ export default function Product(props) {
                                     }
                                 </Box>
                                 <InputLabel sx={{ cursor: 'pointer', border: 1, borderRadius: '7%', textAlign: 'center' }}>
-                                    <img src={`${config.apibase}images/product/small/${name}?w=64&h=64&fit=crop&auto=format`} srcSet={`${config.apibase}images/products/small/${name}?w=64&h=64&fit=crop&auto=format&dpr=2 2x`} alt={`${product.modelId}-${id}-${i}`} style={{ verticalAlign: 'middle' }} onError={e => e.target.src = `${config.apibase}images/0.jpg?w=64&h=64&fit=crop&auto=format`} />
+                                    <img src={`${process.env.REACT_APP_API_BASE}images/product/small/${name}?w=64&h=64&fit=crop&auto=format`} srcSet={`${config.apibase}images/products/small/${name}?w=64&h=64&fit=crop&auto=format&dpr=2 2x`} alt={`${product.modelId}-${id}-${i}`} style={{ verticalAlign: 'middle' }} onError={e => e.target.src = `${process.env.REACT_APP_API_BASE}images/0.jpg?w=64&h=64&fit=crop&auto=format`} />
                                     <input name='image' type='file' hidden onChange={e => handleChange(e, i)} accept='image/gif image/png, image/jpeg, image/x-png' />
                                 </InputLabel>
                             </Grid>)

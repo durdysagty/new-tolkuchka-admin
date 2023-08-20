@@ -233,7 +233,7 @@ export default function Models(props) {
     async function deleteModel(isDelete) {
         if (isDelete)
             try {
-                const response = await fetch(`${config.apibase}${config.api}${props.api}/${toDelete}`, {
+                const response = await fetch(`${process.env.REACT_APP_API_BASE}${process.env.REACT_APP_API}${props.api}/${toDelete}`, {
                     method: 'DELETE',
                     credentials: 'include',
                     headers: {
