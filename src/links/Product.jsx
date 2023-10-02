@@ -101,7 +101,7 @@ export default function Product(props) {
             if (getLines || getAdditional) {
                 setGetLines(false)
                 console.log('getLines')
-                let result = await getData(`${props.dataFrom[3]}`, null, { [props.dataFrom[2]]: product.brandId })
+                let result = await getData(`${props.dataFrom[3]}`, null, { [props.dataFrom[2]]: product.brandId }, "pp=300")
                 if (result.ok)
                     setLines(result.data.models)
                 else
