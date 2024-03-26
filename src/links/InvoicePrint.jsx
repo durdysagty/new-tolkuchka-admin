@@ -26,7 +26,7 @@ export default function InvoicePrint(props) {
     const [orders, setOrders] = useState(null)
     const [once, setOnce] = useState('0')
     const [amount, setAmount] = useState(0)
-    const [process] = useState(false)
+    const [processing] = useState(false)
     //#endregion
     useEffect(() => {
         if (once !== 1)
@@ -52,7 +52,7 @@ export default function InvoicePrint(props) {
         }
         if (orders === null && once === 1)
             prepareData()
-    }, [once, props.api, props.dataFrom, id, orders, process])
+    }, [once, props.api, props.dataFrom, id, orders, processing])
 
     const [submitError, setSubmitError] = useState('')
     async function submit(e) {
@@ -65,7 +65,7 @@ export default function InvoicePrint(props) {
         window.location.href = '/invoices'
         // setProcess(false)
     }
-    return (orders === null || process ?
+    return (orders === null || processing ?
         <Progress /> :
         <Box>
             <PageHeader id={id} api={props.api} pro='print' name={` #${id}`} />
@@ -73,7 +73,7 @@ export default function InvoicePrint(props) {
                 <FormHelperText error>{submitError}</FormHelperText>
                 <Box p={4}>
                     <Box textAlign='center'>
-                        <img src={`${config.apibase}logo.png`} alt='logo' />
+                        <img src={`${process.env.REACT_APP_API_BASE}logo.png`} alt='logo' />
                     </Box>
                     <Typography variant='h4'>{`${config.text[`${invoice.language}.invoice`]} #${id}`}</Typography>
                     <Box my={2}>
